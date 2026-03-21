@@ -1,8 +1,49 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:where(.dark, .dark *));
 
+/* Light theme colors - Professional and clean */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1e293b;
+  --panel-bg: #ffffff;
+  --panel-border: #e2e8f0;
+  --header-bg: #f8fafc;
+  --header-border: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+  --button-bg: #f1f5f9;
+  --button-hover: #e2e8f0;
+  --button-active: #cbd5e1;
+  --code-bg: #f8fafc;
+  --blockquote-border: #3b82f6;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark theme colors (Darcula-inspired with improved contrast) */
+.dark {
+  --background: #1e1e1e;
+  --foreground: #e0e0e0;
+  --panel-bg: #252526;
+  --panel-border: #3c3c3c;
+  --header-bg: #2d2d2d;
+  --header-border: #3c3c3c;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --accent-color: #6c99e0;
+  --accent-hover: #8bb0f0;
+  --button-bg: #3c3c3c;
+  --button-hover: #4a4a4a;
+  --button-active: #5a5a5a;
+  --code-bg: #2d2d2d;
+  --blockquote-border: #6c99e0;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
 @theme inline {
@@ -12,15 +53,439 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography improvements */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-bottom: 0.5em;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Custom scrollbar styling - Polished and subtle */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(155, 155, 155, 0.3);
+  border-radius: 5px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(155, 155, 155, 0.5);
+  background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(100, 100, 100, 0.4);
+  background-clip: padding-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 100, 100, 0.6);
+  background-clip: padding-box;
+}
+
+/* Editor textarea styling - Professional appearance */
+textarea {
+  tab-size: 2;
+  background-color: var(--panel-bg);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  padding: 1.25rem;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dark textarea:focus {
+  box-shadow: 0 0 0 3px rgba(108, 153, 224, 0.2);
+}
+
+textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* Markdown preview styling - Enhanced typography */
+.prose {
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.prose h1 {
+  font-size: 2em;
+  margin-top: 0;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.prose h2 {
+  font-size: 1.5em;
+  margin-top: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.prose h3 {
+  font-size: 1.25em;
+  margin-top: 1.25em;
+}
+
+.prose p {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose > * {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.prose pre {
+  background: var(--code-bg);
+  border-radius: 6px;
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--panel-border);
+}
+
+.prose code {
+  background: transparent;
+  padding: 0;
+  font-size: 0.9em;
+  color: var(--text-primary);
+}
+
+.prose :not(pre) > code {
+  background: var(--button-bg);
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: var(--text-primary);
+}
+
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--panel-border);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.prose th {
+  background: var(--header-bg);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.prose tr:hover td {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.dark .prose tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.prose blockquote {
+  border-left: 4px solid var(--blockquote-border);
+  padding: 1rem 1.5rem;
+  margin: 1.5em 0;
+  border-radius: 0 8px 8px 0;
+  background: rgba(0, 0, 0, 0.02);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.dark .prose blockquote {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.prose a {
+  color: var(--accent-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.prose a:hover {
+  border-bottom-color: var(--accent-color);
+  text-decoration: none;
+}
+
+.prose strong {
+  color: var(--text-primary);
+}
+
+.prose ul,
+.prose ol {
+  color: var(--text-primary);
+}
+
+/* Dark mode specific prose adjustments */
+.dark .prose {
+  color: #e0e0e0;
+}
+
+.dark .prose strong {
+  color: #ffffff;
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: #ffffff;
+}
+
+.dark .prose a {
+  color: #6c99e0;
+}
+
+.dark .prose a:hover {
+  color: #8bb0f0;
+}
+
+.dark .prose :not(pre) > code {
+  background: #4a4a4a;
+  color: #ffffff;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+}
+
+.dark .prose pre {
+  background: #1a1a1a;
+  border-color: #3c3c3c;
+}
+
+.dark .prose blockquote {
+  color: #a0a0a0;
+  border-left-color: #6c99e0;
+}
+
+.dark .prose th {
+  background: #333333;
+  color: #ffffff;
+}
+
+.dark .prose td {
+  color: #e0e0e0;
+}
+
+.dark .prose table {
+  border-color: #3c3c3c;
+}
+
+.dark .prose hr {
+  border-color: #3c3c3c;
+}
+
+/* Panel styling - Professional with subtle shadows */
+.panel {
+  background-color: var(--panel-bg);
+  border-color: var(--panel-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.panel-header {
+  background-color: var(--header-bg);
+  border-color: var(--header-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .panel-header {
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Button styling - Professional with better interactions */
+.btn {
+  background-color: var(--button-bg);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  font-weight: 500;
+}
+
+.btn:hover {
+  background-color: var(--button-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:active {
+  background-color: var(--button-active);
+  transform: translateY(1px);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Primary button variant */
+.btn-primary {
+  background-color: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Text colors */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* Border colors */
+.border-panel {
+  border-color: var(--panel-border);
+}
+
+/* Syntax highlighting for code blocks (Darcula-inspired theme) */
+.dark .prose pre {
+  background: #1e1e1e;
+  border: 1px solid #3c3c3c;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.token.punctuation {
+  color: #d4d4d4;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #b5cea8;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #ce9178;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #d4d4d4;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #569cd6;
+  font-weight: bold;
+}
+
+.token.function,
+.token.class-name {
+  color: #dcdcaa;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: #d16969;
+}
+
+/* Additional dark mode specific code highlighting */
+.dark .token.comment,
+.dark .token.prolog,
+.dark .token.doctype,
+.dark .token.cdata {
+  color: #808080;
+}
+
+.dark .token.keyword {
+  color: #6c99e0;
+}
+
+.dark .token.string {
+  color: #ce9178;
+}
+
+.dark .token.number {
+  color: #b5cea8;
+}
+
+.dark .token.function {
+  color: #dcdcaa;
+}
+
+/* Transition for theme switching */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
