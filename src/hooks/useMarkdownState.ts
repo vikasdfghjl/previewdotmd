@@ -1,4 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+
+const STORAGE_KEY = 'previewdotmd-content';
+const AUTOSAVE_DELAY = 1000; // 1 second debounce
 
 const DEFAULT_MARKDOWN = `# Hello, World!
 
@@ -30,8 +33,48 @@ greet('World');
 3. Third item
 `;
 
-export function useMarkdownState(initialValue = DEFAULT_MARKDOWN) {
-  const [markdown, setMarkdown] = useState<string>(initialValue);
+function loadFromStorage(): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function saveToStorage(content: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, content);
+  } catch {
+    // Storage full or unavailable
+  }
+}
+
+export function useMarkdownState(initialValue?: string) {
+  const [markdown, setMarkdown] = useState<string>(() => {
+    const saved = loadFromStorage();
+    return saved ?? initialValue ?? DEFAULT_MARKDOWN;
+  });
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  // Auto-save effect with debounce
+  useEffect(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      saveToStorage(markdown);
+      setLastSaved(new Date());
+    }, AUTOSAVE_DELAY);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [markdown]);
 
   const handleChange = useCallback((value: string) => {
     setMarkdown(value);
@@ -50,5 +93,6 @@ export function useMarkdownState(initialValue = DEFAULT_MARKDOWN) {
     handleChange,
     handleClear,
     handleReset,
+    lastSaved,
   };
 }
