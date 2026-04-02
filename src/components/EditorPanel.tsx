@@ -3,6 +3,13 @@ import { ActionButton } from './ActionButton';
 import { PanelHeader } from './PanelHeader';
 import { FindReplace } from './FindReplace';
 import { SyntaxHighlightOverlay } from './SyntaxHighlightOverlay';
+import { useFindReplace } from '@/hooks/useFindReplace';
+import { useEditorShortcuts } from '@/hooks/useEditorShortcuts';
+import { useBracketMatching } from '@/hooks/useBracketMatching';
+import { useSmartTyping } from '@/hooks/useSmartTyping';
+import { useColumnSelection } from '@/hooks/useColumnSelection';
+import { useAutoComplete } from '@/hooks/useAutoComplete';
+import { Icons } from '@/constants/icons';
 
 interface EditorPanelProps {
   markdown: string;
@@ -35,11 +42,57 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [findReplaceOpen, setFindReplaceOpen] = useState(false);
-  const [matchCount, setMatchCount] = useState(0);
-  const [currentMatch, setCurrentMatch] = useState(0);
-  const [matches, setMatches] = useState<number[]>([]);
   const isScrollingRef = useRef(false);
+
+  const {
+    isOpen: findReplaceOpen,
+    matchCount,
+    currentMatch,
+    open: openFindReplace,
+    close: closeFindReplace,
+    toggle: toggleFindReplace,
+    handleFind,
+    handleReplace,
+    goToNextMatch,
+    goToPrevMatch,
+  } = useFindReplace({ markdown, onChange, textareaRef });
+
+  // Bracket matching
+  const {
+    activeMatch: activeBracketMatch,
+    handleCursorChange: handleBracketCursorChange,
+  } = useBracketMatching(markdown);
+
+  useEditorShortcuts({
+    markdown,
+    onChange,
+    textareaRef,
+    onOpenFindReplace: openFindReplace,
+  });
+
+  // Smart typing - auto-close brackets, quotes, and markdown pairs
+  const { handleKeyDown: handleSmartTyping } = useSmartTyping(textareaRef, {
+    autoCloseBrackets: true,
+    autoCloseQuotes: true,
+    autoCloseMarkdown: true,
+  });
+
+  // Column selection - Alt+Drag for rectangular selection
+  const {
+    handleMouseDown: handleColumnMouseDown,
+    handleMouseMove: handleColumnMouseMove,
+    handleMouseUp: handleColumnMouseUp,
+  } = useColumnSelection(textareaRef, markdown);
+
+  // Auto-completion - Markdown syntax suggestions
+  const {
+    suggestions,
+    selectedIndex,
+    isVisible: showAutoComplete,
+    handleInput: handleAutoCompleteInput,
+    handleKeyDown: handleAutoCompleteKeyDown,
+    insertSuggestion,
+  } = useAutoComplete(textareaRef, markdown);
 
   useImperativeHandle(ref, () => ({
     scrollToPercentage: (percentage: number) => {
@@ -54,13 +107,8 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
     },
   }));
 
-  const lineCount = useMemo(() => {
-    return markdown.split('\n').length || 1;
-  }, [markdown]);
-
-  const lineNumbers = useMemo(() => {
-    return Array.from({ length: lineCount }, (_, i) => i + 1);
-  }, [lineCount]);
+  const lineCount = useMemo(() => markdown.split('\n').length || 1, [markdown]);
+  const lineNumbers = useMemo(() => Array.from({ length: lineCount }, (_, i) => i + 1), [lineCount]);
 
   const handleScroll = useCallback(() => {
     if (textareaRef.current && lineNumbersRef.current) {
@@ -74,132 +122,49 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
     }
   }, [onScroll]);
 
-  // Find/Replace functions
-  const handleFind = useCallback((query: string) => {
-    if (!query) {
-      setMatches([]);
-      setMatchCount(0);
-      setCurrentMatch(0);
-      return;
-    }
-
-    const foundMatches: number[] = [];
-    let index = 0;
-    const lowerMarkdown = markdown.toLowerCase();
-    const lowerQuery = query.toLowerCase();
-
-    while ((index = lowerMarkdown.indexOf(lowerQuery, index)) !== -1) {
-      foundMatches.push(index);
-      index += 1;
-    }
-
-    setMatches(foundMatches);
-    setMatchCount(foundMatches.length);
-    setCurrentMatch(foundMatches.length > 0 ? 1 : 0);
-  }, [markdown]);
-
-  const handleReplace = useCallback((query: string, replacement: string, replaceAll: boolean) => {
-    if (!query) return;
-
-    if (replaceAll) {
-      const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-      onChange(markdown.replace(regex, replacement));
-      setMatches([]);
-      setMatchCount(0);
-      setCurrentMatch(0);
-    } else if (matches.length > 0 && currentMatch > 0) {
-      const matchIndex = matches[currentMatch - 1];
-      const newContent = markdown.slice(0, matchIndex) + replacement + markdown.slice(matchIndex + query.length);
-      onChange(newContent);
-    }
-  }, [markdown, onChange, matches, currentMatch]);
-
-  const goToNextMatch = useCallback(() => {
-    if (matches.length === 0) return;
-    const nextMatch = currentMatch >= matches.length ? 1 : currentMatch + 1;
-    setCurrentMatch(nextMatch);
+  // Handle cursor position change for bracket matching
+  const handleCursorChange = useCallback(() => {
     if (textareaRef.current) {
-      textareaRef.current.setSelectionRange(matches[nextMatch - 1], matches[nextMatch - 1] + 1);
-      textareaRef.current.focus();
+      const textarea = textareaRef.current;
+      const cursorPosition = textarea.selectionStart;
+
+      // Convert position to line and column
+      const textBeforeCursor = markdown.slice(0, cursorPosition);
+      const lines = textBeforeCursor.split('\n');
+      const cursorLine = lines.length - 1;
+      const cursorColumn = lines[lines.length - 1].length;
+
+      handleBracketCursorChange(cursorLine, cursorColumn);
     }
-  }, [matches, currentMatch]);
-
-  const goToPrevMatch = useCallback(() => {
-    if (matches.length === 0) return;
-    const prevMatch = currentMatch <= 1 ? matches.length : currentMatch - 1;
-    setCurrentMatch(prevMatch);
-    if (textareaRef.current) {
-      textareaRef.current.setSelectionRange(matches[prevMatch - 1], matches[prevMatch - 1] + 1);
-      textareaRef.current.focus();
-    }
-  }, [matches, currentMatch]);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-        e.preventDefault();
-        setFindReplaceOpen(true);
-      }
-      if (e.key === 'Escape') {
-        setFindReplaceOpen(false);
-      }
-
-      // Markdown formatting shortcuts when textarea is focused
-      if (textareaRef.current && document.activeElement === textareaRef.current) {
-        const textarea = textareaRef.current;
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = markdown.slice(start, end);
-
-        if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
-          e.preventDefault();
-          const wrapped = `**${selectedText}**`;
-          onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
-          setTimeout(() => {
-            textarea.setSelectionRange(start + 2, end + 2);
-          }, 0);
-        }
-
-        if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
-          e.preventDefault();
-          const wrapped = `*${selectedText}*`;
-          onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
-          setTimeout(() => {
-            textarea.setSelectionRange(start + 1, end + 1);
-          }, 0);
-        }
-
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-          e.preventDefault();
-          const wrapped = `[${selectedText}](url)`;
-          onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
-          setTimeout(() => {
-            if (selectedText) {
-              textarea.setSelectionRange(start + wrapped.length - 1, start + wrapped.length - 4);
-            } else {
-              textarea.setSelectionRange(start + 1, end + 1);
-            }
-          }, 0);
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [markdown, onChange]);
+  }, [markdown, handleBracketCursorChange]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.addEventListener('scroll', handleScroll);
-      return () => textarea.removeEventListener('scroll', handleScroll);
+      textarea.addEventListener('keyup', handleCursorChange);
+      textarea.addEventListener('click', handleCursorChange);
+      return () => {
+        textarea.removeEventListener('scroll', handleScroll);
+        textarea.removeEventListener('keyup', handleCursorChange);
+        textarea.removeEventListener('click', handleCursorChange);
+      };
     }
-  }, [handleScroll]);
+  }, [handleScroll, handleCursorChange]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    onChange(e.target.value);
-  };
+  // Combined keydown handler
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Try auto-complete first
+    if (handleAutoCompleteKeyDown(e)) return;
+    
+    // Then smart typing
+    if (handleSmartTyping(e)) return;
+  }, [handleAutoCompleteKeyDown, handleSmartTyping]);
+
+  // Combined input handler
+  const handleInput = useCallback(() => {
+    handleAutoCompleteInput();
+  }, [handleAutoCompleteInput]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -227,7 +192,6 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-
     const file = e.dataTransfer.files[0];
     if (file && onFileUpload) {
       onFileUpload(file);
@@ -236,63 +200,22 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
 
   const actions = (
     <>
-      <ActionButton
-        onClick={() => fileInputRef.current?.click()}
-        title="Upload markdown file"
-      >
-        <div className="flex items-center gap-1.5">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-          </svg>
-          <span>Upload</span>
-        </div>
+      <ActionButton onClick={() => fileInputRef.current?.click()} title="Upload markdown file">
+        <div className="flex items-center gap-1.5">{Icons.upload}<span>Upload</span></div>
       </ActionButton>
-      <ActionButton
-        onClick={() => setFindReplaceOpen(!findReplaceOpen)}
-        title="Find & Replace (Ctrl+F)"
-      >
-        <div className="flex items-center gap-1.5">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <span>Find</span>
-        </div>
+      <ActionButton onClick={toggleFindReplace} title="Find & Replace (Ctrl+F)">
+        <div className="flex items-center gap-1.5">{Icons.search}<span>Find</span></div>
       </ActionButton>
       {onDownload && (
-        <ActionButton
-          onClick={onDownload}
-          title="Download markdown file"
-        >
-          <div className="flex items-center gap-1.5">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            <span>Download</span>
-          </div>
+        <ActionButton onClick={onDownload} title="Download markdown file">
+          <div className="flex items-center gap-1.5">{Icons.download}<span>Download</span></div>
         </ActionButton>
       )}
-      <ActionButton 
-        onClick={onClear} 
-        title="Clear all markdown"
-        variant="danger"
-      >
-        <div className="flex items-center gap-1.5">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-          <span>Clear</span>
-        </div>
+      <ActionButton onClick={onClear} title="Clear all markdown" variant="danger">
+        <div className="flex items-center gap-1.5">{Icons.trash}<span>Clear</span></div>
       </ActionButton>
-      <ActionButton 
-        onClick={onReset} 
-        title="Reset to default example"
-      >
-        <div className="flex items-center gap-1.5">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          <span>Reset</span>
-        </div>
+      <ActionButton onClick={onReset} title="Reset to default example">
+        <div className="flex items-center gap-1.5">{Icons.reset}<span>Reset</span></div>
       </ActionButton>
     </>
   );
@@ -302,31 +225,23 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
       <PanelHeader
         title="Markdown Input"
         subtitle="Paste or write markdown"
+        icon={Icons.edit}
         actions={actions}
         onToggle={onToggle}
         isHidden={!isVisible}
       />
-      
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".md,.markdown"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-      
-      {/* Editor container with line numbers */}
-      <div 
+
+      <input ref={fileInputRef} type="file" accept=".md,.markdown" onChange={handleFileSelect} className="hidden" />
+
+      <div
         className="flex-1 relative flex overflow-hidden"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* Find & Replace panel */}
         <FindReplace
           isOpen={findReplaceOpen}
-          onClose={() => setFindReplaceOpen(false)}
+          onClose={closeFindReplace}
           onFind={handleFind}
           onReplace={handleReplace}
           matchCount={matchCount}
@@ -334,54 +249,106 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
           onNext={goToNextMatch}
           onPrev={goToPrevMatch}
         />
-        {/* Line numbers gutter */}
+
         <div
           ref={lineNumbersRef}
-          className="w-12 flex-shrink-0 overflow-hidden text-right pr-2 pt-4 pb-4 font-mono text-xs text-gray-400 dark:text-gray-500 select-none bg-gray-50/50 dark:bg-gray-800/30"
+          className="w-12 flex-shrink-0 overflow-hidden text-right pr-2 pt-4 pb-4 font-mono text-sm text-gray-500 dark:text-gray-400 select-none bg-gray-50/50 dark:bg-gray-800/30"
+          aria-label="Line numbers"
+          aria-hidden="true"
         >
           {lineNumbers.map((num) => (
-            <div key={num} className="leading-5 h-5">
-              {num}
+            <div
+              key={num}
+              className="leading-6 h-6 flex items-center justify-end"
+            >
+              <span>{num}</span>
             </div>
           ))}
         </div>
 
-        {/* Editor textarea with syntax highlighting */}
         <div className="flex-1 relative">
-          <SyntaxHighlightOverlay markdown={markdown} />
+          <SyntaxHighlightOverlay
+            markdown={markdown}
+            activeBracketMatch={activeBracketMatch}
+          />
           <textarea
             ref={textareaRef}
-            className="absolute inset-0 w-full h-full font-mono text-sm resize-none outline-none p-4 pt-4 pb-4 leading-5 bg-transparent text-transparent caret-gray-900 dark:caret-white"
+            className="absolute inset-0 w-full h-full font-mono text-sm resize-none outline-none p-4 pt-4 pb-4 leading-5 bg-transparent text-transparent caret-gray-900 dark:caret-white focus:ring-2 focus:ring-inset focus:ring-blue-500/30"
             value={markdown}
-            onChange={handleChange}
-            placeholder={"# Start writing your markdown...\n\n## Features\n- **Bold** and *italic* text\n- Lists and tables\n- Code blocks with syntax highlighting\n\n```javascript\nconsole.log('Hello World!');\n```\n\n> Beautiful, formatted preview appears on the right"}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onInput={handleInput}
+            onMouseDown={handleColumnMouseDown}
+            onMouseMove={handleColumnMouseMove}
+            onMouseUp={handleColumnMouseUp}
+            onMouseLeave={handleColumnMouseUp}
+            placeholder="# Start writing your markdown..."
             spellCheck={false}
+            aria-label="Markdown editor. Enter markdown content here."
+            aria-describedby="editor-stats"
+            aria-autocomplete="list"
+            aria-controls={showAutoComplete ? 'autocomplete-list' : undefined}
+            aria-expanded={showAutoComplete}
           />
+          
+          {/* Auto-complete suggestions */}
+          {showAutoComplete && (
+            <div
+              id="autocomplete-list"
+              className="absolute z-30 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+              style={{
+                bottom: '100%',
+                left: '1rem',
+                marginBottom: '0.5rem',
+              }}
+              role="listbox"
+              aria-label="Markdown syntax suggestions"
+            >
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={suggestion.label}
+                  className={`
+                    w-full px-3 py-2 text-left text-sm flex items-center justify-between gap-4
+                    ${index === selectedIndex 
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }
+                    ${index === 0 ? 'rounded-t-lg' : ''}
+                    ${index === suggestions.length - 1 ? 'rounded-b-lg' : ''}
+                  `}
+                  onClick={() => insertSuggestion(suggestion)}
+                  role="option"
+                  aria-selected={index === selectedIndex}
+                >
+                  <span className="font-medium">{suggestion.label}</span>
+                  {suggestion.description && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {suggestion.description}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-        
-        {/* Drag and drop overlay */}
+
         {isDragging && (
           <div className="absolute inset-0 bg-blue-500/20 border-2 border-dashed border-blue-500 rounded-lg flex items-center justify-center z-10">
             <div className="text-center">
-              <svg className="w-12 h-12 mx-auto text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
+              <span className="text-blue-500">{Icons.drag}</span>
               <p className="text-blue-600 dark:text-blue-400 font-medium">Drop markdown file here</p>
             </div>
           </div>
         )}
       </div>
-      
-      {/* Footer with stats */}
+
       <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-between">
-        <div className="flex items-center gap-4 text-xs text-secondary">
+        <div id="editor-stats" className="flex items-center gap-4 text-xs text-secondary" aria-label="Editor statistics">
           <span>{markdown.length} characters</span>
           <span>{markdown.split(/\s+/).filter(Boolean).length} words</span>
           <span>{markdown.split('\n').length} lines</span>
         </div>
-        <div className="text-xs text-secondary opacity-60">
-          Tab size: 2 spaces
-        </div>
+        <div className="text-xs text-secondary opacity-60">Tab size: 2 spaces</div>
       </div>
     </div>
   );

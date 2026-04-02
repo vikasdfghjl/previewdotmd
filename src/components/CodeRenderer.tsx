@@ -5,20 +5,16 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from '@/contexts/ThemeContext';
+import { MermaidRenderer } from './MermaidRenderer';
 
-interface CodeRendererProps {
-  node?: any;
+type CodeRendererProps = React.ComponentPropsWithoutRef<'code'> & {
   inline?: boolean;
-  className?: string;
-  children?: React.ReactNode;
-  [key: string]: any;
-}
+};
 
 export const CodeRenderer: React.FC<CodeRendererProps> = ({
-  node,
-  inline,
-  className,
+  className = '',
   children,
+  inline = false,
   ...props
 }) => {
   const { theme } = useTheme();
@@ -29,7 +25,13 @@ export const CodeRenderer: React.FC<CodeRendererProps> = ({
   const syntaxTheme = isDark ? oneDark : oneLight;
   
   const match = /language-(\w+)/.exec(className || '');
-  
+  const language = match ? match[1] : '';
+
+  // Handle Mermaid diagrams
+  if (!inline && language === 'mermaid') {
+    return <MermaidRenderer chart={String(children).replace(/\n$/, '')} />;
+  }
+
   // Copy to clipboard function
   const handleCopy = async () => {
     try {
@@ -40,7 +42,7 @@ export const CodeRenderer: React.FC<CodeRendererProps> = ({
       console.error('Failed to copy:', err);
     }
   };
-  
+
   if (!inline && match) {
     return (
       <div className="relative group my-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -53,15 +55,18 @@ export const CodeRenderer: React.FC<CodeRendererProps> = ({
               <div className="w-3 h-3 rounded-full bg-green-400" />
             </div>
             <span className="text-xs font-medium text-secondary ml-2">
-              {match[1]}
+              {language}
             </span>
           </div>
           
           {/* Copy button */}
           <button
             onClick={handleCopy}
-            className="btn px-2 py-1 text-xs rounded-md flex items-center gap-1.5 transition-all"
+            className="btn px-3 py-2 min-h-[44px] text-xs rounded-md flex items-center gap-1.5 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             title={copied ? 'Copied!' : 'Copy code'}
+            aria-label={copied ? `Code copied to clipboard. ${language} language` : `Copy ${language} code to clipboard`}
+            aria-live="polite"
+            aria-atomic="true"
           >
             {copied ? (
               <>
@@ -94,7 +99,6 @@ export const CodeRenderer: React.FC<CodeRendererProps> = ({
               fontSize: '0.875rem',
               lineHeight: '1.5',
             }}
-            {...props}
           >
             {String(children).replace(/\n$/, '')}
           </SyntaxHighlighter>

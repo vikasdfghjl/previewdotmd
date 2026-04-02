@@ -489,3 +489,117 @@ textarea::placeholder {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
+
+/* ============================================
+   Extended Markdown Support Styles
+   ============================================ */
+
+/* Definition Lists (remark-deflist) */
+.prose dl {
+  margin: 1.5em 0;
+}
+
+.prose dt {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.prose dd {
+  margin-left: 1.5em;
+  margin-bottom: 0.75em;
+  color: var(--text-secondary);
+}
+
+.dark .prose dt {
+  color: #ffffff;
+}
+
+.dark .prose dd {
+  color: #a0a0a0;
+}
+
+/* KaTeX Math Styling */
+.katex {
+  font-size: 1.1em;
+  color: var(--text-primary);
+}
+
+.katex-display {
+  margin: 1.5em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.katex-display .katex {
+  font-size: 1.21em;
+}
+
+.dark .katex {
+  color: #e0e0e0;
+}
+
+/* Ensure math doesn't overflow */
+.katex-display::-webkit-scrollbar {
+  height: 4px;
+}
+
+.katex-display::-webkit-scrollbar-thumb {
+  background: rgba(155, 155, 155, 0.3);
+  border-radius: 2px;
+}
+
+/* Emoji Styling */
+.prose .emoji {
+  height: 1.2em;
+  width: 1.2em;
+  vertical-align: text-bottom;
+  display: inline-block;
+}
+
+/* Footnotes Styling */
+.prose .footnotes {
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--panel-border);
+  font-size: 0.9em;
+}
+
+.prose .footnotes ol {
+  padding-left: 1.5em;
+}
+
+.prose .footnotes li {
+  margin-bottom: 0.5em;
+}
+
+.prose .footnote-backref {
+  margin-left: 0.5em;
+  font-size: 0.85em;
+}
+
+.dark .prose .footnotes {
+  border-top-color: #3c3c3c;
+}
+
+/* Mermaid Diagram Container */
+.mermaid {
+  text-align: center;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Task Lists Enhancement */
+.prose input[type="checkbox"] {
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+
+.prose li:has(input[type="checkbox"]) {
+  list-style-type: none;
+  margin-left: -1.5em;
+}

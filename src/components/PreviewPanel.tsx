@@ -1,9 +1,16 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { CodeRenderer } from './CodeRenderer';
 import { PanelHeader } from './PanelHeader';
 import { ActionButton } from './ActionButton';
+import { ScrollSyncIndicator } from './ScrollSyncIndicator';
+import { AnchorHeading } from './AnchorHeading';
+import { ImageLightbox, ClickableImage } from './ImageLightbox';
+import { remarkPlugins, rehypePlugins } from '@/lib/markdownPlugins';
+import { Icons } from '@/constants/icons';
+
+// Import KaTeX CSS for math rendering
+import 'katex/dist/katex.min.css';
 
 interface PreviewPanelProps {
   markdown: string;
@@ -14,6 +21,7 @@ interface PreviewPanelProps {
   onExportPlainText?: () => void;
   zoomLevel?: number;
   onScroll?: (percentage: number) => void;
+  syncScrollActive?: boolean;
 }
 
 export interface PreviewPanelRef {
@@ -29,6 +37,7 @@ export const PreviewPanel = forwardRef<PreviewPanelRef, PreviewPanelProps>(({
   onExportPlainText,
   zoomLevel = 100,
   onScroll,
+  syncScrollActive = false,
 }, ref) => {
   const [showExportMenu, setShowExportMenu] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -60,61 +69,59 @@ export const PreviewPanel = forwardRef<PreviewPanelRef, PreviewPanelProps>(({
       <ActionButton
         onClick={() => setShowExportMenu(!showExportMenu)}
         title="Export options"
+        aria-haspopup="menu"
+        aria-expanded={showExportMenu}
+        aria-controls="export-menu"
       >
         <div className="flex items-center gap-1.5">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-          </svg>
+          {Icons.export}
           <span>Export</span>
         </div>
       </ActionButton>
-      
+
       {showExportMenu && (
         <>
-          <div 
-            className="fixed inset-0 z-10" 
+          <div
+            className="fixed inset-0 z-10"
             onClick={() => setShowExportMenu(false)}
+            aria-hidden="true"
           />
-          <div className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
+          <div
+            id="export-menu"
+            role="menu"
+            aria-label="Export options"
+            className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20"
+          >
             {onExportHtml && (
               <button
-                onClick={() => {
-                  onExportHtml();
-                  setShowExportMenu(false);
-                }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                role="menuitem"
+                onClick={() => { onExportHtml(); setShowExportMenu(false); }}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                aria-label="Export markdown as HTML file"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                </svg>
+                {Icons.code}
                 Export as HTML
               </button>
             )}
             {onExportPdf && (
               <button
-                onClick={() => {
-                  onExportPdf();
-                  setShowExportMenu(false);
-                }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                role="menuitem"
+                onClick={() => { onExportPdf(); setShowExportMenu(false); }}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                aria-label="Export markdown as PDF file"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
+                {Icons.file}
                 Export as PDF
               </button>
             )}
             {onExportPlainText && (
               <button
-                onClick={() => {
-                  onExportPlainText();
-                  setShowExportMenu(false);
-                }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                role="menuitem"
+                onClick={() => { onExportPlainText(); setShowExportMenu(false); }}
+                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                aria-label="Export markdown as plain text file"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                {Icons.document}
                 Export as Plain Text
               </button>
             )}
@@ -129,6 +136,7 @@ export const PreviewPanel = forwardRef<PreviewPanelRef, PreviewPanelProps>(({
       <PanelHeader
         title="Live Preview"
         subtitle="Formatted output"
+        icon={Icons.eye}
         actions={exportActions}
         onToggle={onToggle}
         isHidden={!isVisible}
@@ -158,16 +166,33 @@ export const PreviewPanel = forwardRef<PreviewPanelRef, PreviewPanelProps>(({
               </p>
             </div>
           ) : (
-            <div className="prose prose-slate dark:prose-invert max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code: CodeRenderer as any,
-                }}
-              >
-                {markdown}
-              </ReactMarkdown>
-            </div>
+            <ImageLightbox>
+              <div className="prose prose-slate dark:prose-invert max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={remarkPlugins}
+                  rehypePlugins={rehypePlugins}
+                  components={{
+                    code: CodeRenderer,
+                    h1: ({ children, ...props }) => <AnchorHeading level={1} {...props}>{children}</AnchorHeading>,
+                    h2: ({ children, ...props }) => <AnchorHeading level={2} {...props}>{children}</AnchorHeading>,
+                    h3: ({ children, ...props }) => <AnchorHeading level={3} {...props}>{children}</AnchorHeading>,
+                    h4: ({ children, ...props }) => <AnchorHeading level={4} {...props}>{children}</AnchorHeading>,
+                    h5: ({ children, ...props }) => <AnchorHeading level={5} {...props}>{children}</AnchorHeading>,
+                    h6: ({ children, ...props }) => <AnchorHeading level={6} {...props}>{children}</AnchorHeading>,
+                    img: ({ src, alt, ...props }) => (
+                      <ClickableImage 
+                        src={typeof src === 'string' ? src : ''} 
+                        alt={typeof alt === 'string' ? alt : ''} 
+                        className="rounded-lg shadow-md"
+                        {...props}
+                      />
+                    ),
+                  }}
+                >
+                  {markdown}
+                </ReactMarkdown>
+              </div>
+            </ImageLightbox>
           )}
         </div>
       </div>
@@ -180,9 +205,12 @@ export const PreviewPanel = forwardRef<PreviewPanelRef, PreviewPanelProps>(({
           </svg>
           <span>Real-time preview</span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-secondary">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span>GitHub Flavored Markdown</span>
+        <div className="flex items-center gap-3">
+          <ScrollSyncIndicator isActive={syncScrollActive} />
+          <div className="flex items-center gap-2 text-xs text-secondary">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span>GitHub Flavored Markdown</span>
+          </div>
         </div>
       </div>
     </div>

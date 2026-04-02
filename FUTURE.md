@@ -3,114 +3,135 @@
 This document outlines potential enhancements and features for the Markdown Preview application. These are ideas for future development, categorized by area of improvement.
 
 ## 1. File Operations
-- **File Upload**: Drag-and-drop or file picker for `.md` files
-- **Download**: Save current markdown as `.md` file
-- **Export Options**: Export formatted preview as:
-  - HTML document
-  - PDF file
-  - Plain text
+- [x] **File Upload**: Drag-and-drop or file picker for `.md` files
+- [x] **Download**: Save current markdown as `.md` file
+- [x] **Export Options**: Export formatted preview as:
+  - [x] HTML document
+  - [x] PDF file
+  - [x] Plain text
 
 ## 2. Editor Enhancements
-- **Line Numbers**: Display line numbers in the editor
-- **Syntax Highlighting**: Markdown syntax highlighting in editor
-- **Find & Replace**: Search and replace functionality
-- **Auto-save**: Automatic saving to localStorage
-- **Bracket Matching**: Highlight matching brackets
-- **Code Folding**: Fold sections of markdown
+- [x] **Line Numbers**: Display line numbers in the editor
+- [x] **Syntax Highlighting**: Markdown syntax highlighting in editor
+- [x] **Find & Replace**: Search and replace functionality
+- [x] **Auto-save**: Automatic saving to localStorage
+- [x] **Bracket Matching**: Highlight matching brackets
 
 ## 3. Extended Markdown Support
-- **Math Equations**: KaTeX/LaTeX math rendering
-- **Diagrams**: Mermaid.js integration for:
-  - Flowcharts
-  - Sequence diagrams
-  - Gantt charts
-  - Class diagrams
-- **Emoji Support**: Convert emoji codes to actual emojis
-- **Footnotes**: Markdown footnotes support
-- **Task Lists**: Interactive task list checkboxes
-- **Definition Lists**: Term-definition pairs
-- **Abbreviations**: Glossary-style abbreviations
+- [x] **Math Equations**: KaTeX/LaTeX math rendering
+- [x] **Diagrams**: Mermaid.js integration for:
+  - [x] Flowcharts
+  - [x] Sequence diagrams
+  - [x] Gantt charts
+  - [x] Class diagrams
+- [x] **Emoji Support**: Convert emoji codes to actual emojis
+- [ ] **Footnotes**: Markdown footnotes support (disabled due to vfile compatibility)
+- [x] **Task Lists**: Interactive task list checkboxes (via remark-gfm)
+- [x] **Definition Lists**: Term-definition pairs
+- [ ] **Abbreviations**: Glossary-style abbreviations
 
 ## 4. View Options & Layout
-- **Synchronized Scrolling**: Sync editor and preview scroll positions
-- **Fullscreen Mode**: Distraction-free editing
-- **Layout Options**:
-  - Stacked (editor above preview)
-  - Tabbed interface
-  - Adjustable split ratios
-- **Zoom Controls**: Zoom in/out of preview
-- **Reading Mode**: Minimalist preview-only view
+- [x] **Synchronized Scrolling**: Sync editor and preview scroll positions
+- [x] **Fullscreen Mode**: Distraction-free editing
+- [x] **Layout Options**:
+  - [x] Stacked (editor above preview)
+  - [x] Tabbed interface
+  - [x] Adjustable split ratios
+- [x] **Zoom Controls**: Zoom in/out of preview
+- [x] **Reading Mode**: Minimalist preview-only view
 
-## 5. Templates & Snippets
-- **Pre-built Templates**:
-  - README template
-  - Documentation template
-  - Blog post template
-  - API documentation template
-- **Snippet Panel**: Common markdown patterns
-- **Custom Templates**: Save and load user templates
-- **Quick Insert**: Toolbar for common markdown elements
+## 4. Templates & Snippets
+- [ ] **Pre-built Templates**:
+  - [ ] README template
+  - [ ] Documentation template
+  - [ ] Blog post template
+  - [ ] API documentation template
+- [ ] **Snippet Panel**: Common markdown patterns
+- [ ] **Custom Templates**: Save and load user templates
+- [ ] **Quick Insert**: Toolbar for common markdown elements
 
-## 6. Collaboration & Sharing
-- **Shareable Links**: Generate URLs with markdown content encoded
-- **HTML Export**: Copy formatted HTML to clipboard
-- **Real-time Collaboration**: Multiple users editing simultaneously
-- **Version History**: Track changes and restore previous versions
-- **Comments**: Add comments to specific sections
+## 5. Accessibility & UX Improvements
+- [x] **Keyboard Shortcuts**:
+  - [x] Ctrl+B: Toggle bold
+  - [x] Ctrl+I: Toggle italic
+  - [x] Ctrl+K: Insert link
+  - [x] Ctrl+F: Find/Replace
+  - [ ] Ctrl+Shift+C: Copy HTML
+- [x] **Screen Reader Optimizations**: Better ARIA labels and roles
+- [x] **Customizable Font Sizes**: Adjustable text size in editor/preview (via zoom)
+- [x] **Color Themes**: Light/dark mode toggle
+- [ ] **Focus Mode**: Highlight current line/section
+- [x] **Distraction-free Mode**: Fullscreen and Reading Mode
+- [x] **WCAG 2.1 Compliance**: 44px touch targets, visible focus indicators, proper ARIA semantics
 
-## 7. Accessibility & UX Improvements
-- **Keyboard Shortcuts**:
-  - Ctrl+B: Toggle bold
-  - Ctrl+I: Toggle italic
-  - Ctrl+K: Insert link
-  - Ctrl+Shift+C: Copy HTML
-- **Screen Reader Optimizations**: Better ARIA labels and roles
-- **Customizable Font Sizes**: Adjustable text size in editor/preview
-- **Color Themes**: Multiple theme options beyond light/dark
-- **Focus Mode**: Highlight current line/section
-- **Distraction-free Mode**: Hide all UI elements
+## 6. Performance & Technical
+- [ ] **Virtual Scrolling**: For handling very large documents
+- [ ] **Web Workers**: Offload markdown parsing to background threads
+- [x] **Service Worker**: Offline functionality & PWA support
+- [x] **PWA**: Installable app with manifest
+- [ ] **Performance Monitoring**: Track rendering performance
+- [ ] **Bundle Optimization**: Reduce initial load size
 
-## 8. Performance & Technical
-- **Virtual Scrolling**: For handling very large documents
-- **Web Workers**: Offload markdown parsing to background threads
-- **Service Worker**: Offline functionality
-- **Performance Monitoring**: Track rendering performance
-- **Bundle Optimization**: Reduce initial load size
+## 7. Advanced Features
+- [ ] **Table of Contents**: Auto-generated TOC from headings
+- [x] **Word Count Analytics**: Basic statistics (characters, words, lines)
+- [ ] **Grammar Checking**: Integration with grammar tools
 
-## 9. Integration & Export
-- **GitHub Integration**: Sync with GitHub repositories
-- **Cloud Storage**: Save to Google Drive, Dropbox, etc.
-- **API Endpoints**: REST API for programmatic access
-- **Browser Extension**: Chrome/Firefox extension for quick editing
-- **Mobile App**: React Native mobile application
 
-## 10. Advanced Features
-- **Table of Contents**: Auto-generated TOC from headings
-- **Word Count Analytics**: Detailed statistics (reading time, complexity)
-- **Grammar Checking**: Integration with grammar tools
-- **Translation**: Multi-language support
-- **Diff View**: Compare two markdown documents
-- **Presentation Mode**: Convert markdown to slides
+## 8. Editor Productivity
+- [x] **Column Selection**: Alt+Drag for column/rectangular selection
+- [x] **Auto-completion**: Markdown syntax suggestions
+- [x] **Smart Typing**: Auto-close brackets, quotes, and markdown pairs
+- [x] **Command Palette**: Quick access to all commands (Ctrl+Shift+P)
+
+## 9. Preview Enhancements
+- [x] **Scroll Sync Indicator**: Visual indicator showing sync status
+- [x] **Anchor Links**: Click heading to get shareable link to section
+- [x] **Image Lightbox**: Click images to enlarge
+- [ ] **Print Styles**: Optimized CSS for printing
+- [ ] **Responsive Preview**: Simulate mobile/tablet view
+- [ ] **Custom CSS**: User-defined styles for preview
+
+## 10. Import/Export & Integration
+- [ ] **Import from URL**: Fetch markdown from GitHub/GitLab raw URLs
+- [ ] **Notion Integration**: Import/export with Notion pages
+- [ ] **Obsidian Integration**: Work with Obsidian vaults
+- [ ] **Word Export**: Export to .docx format
+- [ ] **Image Upload**: Drag images to upload to CDN (Imgur, Cloudinary)
+- [ ] **Embed External Content**: oEmbed support for YouTube, Twitter, etc.
+
+## 11. Security & Privacy
+- [ ] **Content Security Policy**: Strict CSP headers
+- [ ] **XSS Prevention**: Sanitize untrusted markdown
+- [ ] **Local-Only Mode**: No external requests option
+- [ ] **Encrypted Storage**: Password-protected documents
+- [ ] **Session Timeout**: Auto-lock after inactivity
 
 ## Implementation Priorities
 
 ### High Priority (Core Functionality)
-1. File upload/download
-2. Line numbers in editor
-3. Auto-save functionality
-4. Keyboard shortcuts
+1. [x] File upload/download
+2. [x] Line numbers in editor
+3. [x] Auto-save functionality
+4. [x] Keyboard shortcuts
+5. [x] Accessibility compliance (WCAG 2.1)
 
 ### Medium Priority (Enhanced Experience)
-1. Synchronized scrolling
-2. Export to HTML/PDF
-3. Math equation support
-4. Multiple layout options
+1. [x] Synchronized scrolling
+2. [x] Export to HTML/PDF
+3. [x] Math equation support
+4. [x] Multiple layout options
+5. [ ] Table of Contents
+6. [ ] Copy HTML to clipboard
+7. [ ] Templates & Snippets
 
 ### Low Priority (Advanced Features)
-1. Real-time collaboration
-2. Mobile app
-3. Browser extension
-4. Cloud storage integration
+1. [ ] Real-time collaboration
+2. [ ] Mobile app
+3. [ ] Browser extension
+4. [ ] Cloud storage integration
+5. [ ] Grammar checking
+6. [ ] Presentation mode
 
 ## Contributing
 
@@ -129,4 +150,4 @@ If you'd like to contribute to any of these features, please:
 
 ---
 
-*Last updated: March 22, 2026*
+*Last updated: April 2, 2026*
