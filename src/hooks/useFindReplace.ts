@@ -6,24 +6,11 @@ interface UseFindReplaceOptions {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
-interface UseFindReplaceReturn {
-  isOpen: boolean;
-  matchCount: number;
-  currentMatch: number;
-  open: () => void;
-  close: () => void;
-  toggle: () => void;
-  handleFind: (query: string) => void;
-  handleReplace: (query: string, replacement: string, replaceAll: boolean) => void;
-  goToNextMatch: () => void;
-  goToPrevMatch: () => void;
-}
-
 export function useFindReplace({
   markdown,
   onChange,
   textareaRef,
-}: UseFindReplaceOptions): UseFindReplaceReturn {
+}: UseFindReplaceOptions) {
   const [isOpen, setIsOpen] = useState(false);
   const [matchCount, setMatchCount] = useState(0);
   const [currentMatch, setCurrentMatch] = useState(0);

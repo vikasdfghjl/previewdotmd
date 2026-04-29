@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 
 const STORAGE_KEY = 'previewdotmd-content';
 const AUTOSAVE_DELAY = 1000; // 1 second debounce
+const PREVIEW_DEBOUNCE_DELAY = 150; // ms - throttle preview re-renders
 
 const DEFAULT_MARKDOWN = `# Welcome to Preview.md 🚀
 
@@ -336,8 +337,26 @@ export function useMarkdownState(initialValue?: string) {
     const saved = loadFromStorage();
     return saved ?? initialValue ?? DEFAULT_MARKDOWN;
   });
+  const [previewMarkdown, setPreviewMarkdown] = useState<string>(markdown);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
+  // Debounce preview rendering to reduce re-renders on fast typing
+  useEffect(() => {
+    if (previewDebounceRef.current) {
+      clearTimeout(previewDebounceRef.current);
+    }
+    previewDebounceRef.current = setTimeout(() => {
+      setPreviewMarkdown(markdown);
+    }, PREVIEW_DEBOUNCE_DELAY);
+
+    return () => {
+      if (previewDebounceRef.current) {
+        clearTimeout(previewDebounceRef.current);
+      }
+    };
+  }, [markdown]);
 
   // Auto-save effect with debounce
   useEffect(() => {
@@ -370,6 +389,7 @@ export function useMarkdownState(initialValue?: string) {
 
   return {
     markdown,
+    previewMarkdown,
     handleChange,
     handleClear,
     handleReset,

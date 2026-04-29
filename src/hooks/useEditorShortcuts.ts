@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 
-interface EditorShortcutOptions {
+interface UseEditorShortcutOptions {
   markdown: string;
   onChange: (value: string) => void;
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
@@ -13,7 +13,7 @@ export function useEditorShortcuts({
   onChange,
   textareaRef,
   onOpenFindReplace,
-}: EditorShortcutOptions) {
+}: UseEditorShortcutOptions) {
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
       e.preventDefault();

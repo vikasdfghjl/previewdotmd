@@ -1,21 +1,12 @@
 'use client';
 
 import React from 'react';
-
-interface BracketPosition {
-  line: number;
-  column: number;
-}
-
-interface BracketMatch {
-  open: BracketPosition;
-  close: BracketPosition;
-  type: 'round' | 'square' | 'curly';
-}
+import type { BracketMatch } from '@/hooks/useBracketMatching';
 
 interface SyntaxHighlightOverlayProps {
   markdown: string;
   activeBracketMatch?: BracketMatch | null;
+  zoomLevel?: number;
 }
 
 const highlightMarkdown = (text: string, activeBracketMatch?: BracketMatch | null): string => {
@@ -130,12 +121,14 @@ function highlightCharAtPosition(html: string, position: number, className: stri
 export const SyntaxHighlightOverlay: React.FC<SyntaxHighlightOverlayProps> = ({
   markdown,
   activeBracketMatch,
+  zoomLevel,
 }) => {
   const highlightedHtml = highlightMarkdown(markdown, activeBracketMatch);
 
   return (
     <pre
       className="absolute inset-0 w-full h-full font-mono text-sm p-4 pt-4 pb-4 leading-5 whitespace-pre-wrap break-words pointer-events-none overflow-hidden"
+      style={{ fontSize: `${zoomLevel ?? 100}%` }}
       aria-hidden="true"
       dangerouslySetInnerHTML={{ __html: highlightedHtml + '\n' }}
     />

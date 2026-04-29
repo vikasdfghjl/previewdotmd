@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 
 interface BracketPosition {
   line: number;
@@ -11,12 +11,7 @@ interface BracketMatch {
   type: 'round' | 'square' | 'curly';
 }
 
-interface UseBracketMatchingReturn {
-  matches: BracketMatch[];
-  activeMatch: BracketMatch | null;
-  cursorInBracket: boolean;
-  handleCursorChange: (cursorLine: number, cursorColumn: number) => void;
-}
+export type { BracketPosition, BracketMatch };
 
 const BRACKET_PAIRS: Record<string, string> = {
   '(': ')',
@@ -26,8 +21,7 @@ const BRACKET_PAIRS: Record<string, string> = {
 
 const CLOSE_BRACKETS = new Set([')', ']', '}']);
 
-export function useBracketMatching(content: string): UseBracketMatchingReturn {
-  const [matches, setMatches] = useState<BracketMatch[]>([]);
+export function useBracketMatching(content: string) {
   const [activeMatch, setActiveMatch] = useState<BracketMatch | null>(null);
   const [cursorInBracket, setCursorInBracket] = useState(false);
   const contentRef = useRef(content);
@@ -73,11 +67,7 @@ export function useBracketMatching(content: string): UseBracketMatchingReturn {
     return foundMatches;
   }, []);
 
-  // Recalculate matches when content changes
-  useEffect(() => {
-    const newMatches = findAllMatches(content);
-    setMatches(newMatches);
-  }, [content, findAllMatches]);
+  const matches = useMemo(() => findAllMatches(content), [content, findAllMatches]);
 
   // Handle cursor position change
   const handleCursorChange = useCallback((cursorLine: number, cursorColumn: number) => {

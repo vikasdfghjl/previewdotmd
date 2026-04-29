@@ -1,11 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import dynamic from 'next/dynamic';
 import { useTheme } from '@/contexts/ThemeContext';
 import { MermaidRenderer } from './MermaidRenderer';
+
+const SyntaxHighlighterWrapper = dynamic(
+  () => import('./SyntaxHighlighterWrapper').then(mod => ({ default: mod.SyntaxHighlighterWrapper })),
+  {
+    ssr: false,
+    loading: () => <div className="p-5 text-sm text-secondary font-mono">Loading syntax highlighter...</div>,
+  }
+);
 
 type CodeRendererProps = React.ComponentPropsWithoutRef<'code'> & {
   inline?: boolean;
@@ -20,10 +26,7 @@ export const CodeRenderer: React.FC<CodeRendererProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [copied, setCopied] = useState(false);
-  
-  // Choose syntax highlighting theme based on current mode
-  const syntaxTheme = isDark ? oneDark : oneLight;
-  
+
   const match = /language-(\w+)/.exec(className || '');
   const language = match ? match[1] : '';
 
@@ -86,23 +89,15 @@ export const CodeRenderer: React.FC<CodeRendererProps> = ({
           </button>
         </div>
         
-        {/* Code content */}
+        {/* Lazy-loaded code content */}
         <div className="relative">
-          <SyntaxHighlighter
-            style={syntaxTheme}
+          <SyntaxHighlighterWrapper
             language={match[1]}
-            PreTag="div"
-            customStyle={{
-              margin: 0,
-              padding: '1.25rem',
-              borderRadius: 0,
-              fontSize: '0.875rem',
-              lineHeight: '1.5',
-            }}
+            isDark={isDark}
           >
             {String(children).replace(/\n$/, '')}
-          </SyntaxHighlighter>
-          
+          </SyntaxHighlighterWrapper>
+
           {/* Fade effect at bottom */}
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-black/5 to-transparent dark:from-black/20 pointer-events-none" />
         </div>

@@ -1,32 +1,51 @@
 'use client';
 
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
+
+// Detect hydration: returns false during SSR/first render, true after mount
+function useIsMounted() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
 
 export const DarkModeToggle: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
+  const mounted = useIsMounted();
   const isDark = theme === 'dark';
+
+  // Server-rendered base: no theme-dependent styles to avoid hydration mismatch
+  const background = mounted
+    ? (isDark ? 'linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)')
+    : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+
+  const boxShadow = mounted
+    ? (isDark ? '0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)' : '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)')
+    : '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
+
+  const glowBackground = mounted
+    ? (isDark ? 'radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%)')
+    : 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%)';
 
   return (
     <button
       onClick={toggleTheme}
       className="relative p-2.5 rounded-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-800"
       style={{
-        background: isDark 
-          ? 'linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)' 
-          : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-        boxShadow: isDark 
-          ? '0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)' 
-          : '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+        background,
+        boxShadow,
       }}
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-      title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      aria-label={`Switch to ${mounted && isDark ? 'light' : 'dark'} mode`}
+      title={`Switch to ${mounted && isDark ? 'light' : 'dark'} mode`}
     >
       <div className="relative w-6 h-6 overflow-hidden">
         {/* Sun Icon (Light Mode) */}
         <div
           className={`absolute inset-0 transform transition-all duration-500 ease-out ${
-            isDark 
+            mounted && isDark 
               ? 'rotate-90 scale-0 opacity-0' 
               : 'rotate-0 scale-100 opacity-100'
           }`}
@@ -47,7 +66,7 @@ export const DarkModeToggle: React.FC = () => {
         {/* Moon Icon (Dark Mode) */}
         <div
           className={`absolute inset-0 transform transition-all duration-500 ease-out ${
-            isDark 
+            mounted && isDark 
               ? 'rotate-0 scale-100 opacity-100' 
               : '-rotate-90 scale-0 opacity-0'
           }`}
@@ -72,9 +91,7 @@ export const DarkModeToggle: React.FC = () => {
           isDark ? 'opacity-0 hover:opacity-100' : 'opacity-0 hover:opacity-100'
         }`}
         style={{
-          background: isDark 
-            ? 'radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)' 
-            : 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%)',
+          background: glowBackground,
         }}
       />
     </button>

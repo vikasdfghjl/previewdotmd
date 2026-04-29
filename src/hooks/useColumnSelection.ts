@@ -7,17 +7,6 @@ interface ColumnSelection {
   endCol: number;
 }
 
-interface UseColumnSelectionReturn {
-  isSelecting: boolean;
-  isColumnMode: boolean;
-  columnSelection: ColumnSelection | null;
-  handleMouseDown: (e: React.MouseEvent) => void;
-  handleMouseMove: (e: React.MouseEvent) => void;
-  handleMouseUp: () => void;
-  getSelectedText: () => string;
-  insertColumnText: (text: string) => void;
-}
-
 /**
  * useColumnSelection - Hook for column/rectangular selection
  * Alt+Drag to select a rectangular region of text
@@ -25,7 +14,7 @@ interface UseColumnSelectionReturn {
 export function useColumnSelection(
   textareaRef: React.RefObject<HTMLTextAreaElement | null>,
   markdown: string
-): UseColumnSelectionReturn {
+) {
   const [isSelecting, setIsSelecting] = useState(false);
   const [isColumnMode, setIsColumnMode] = useState(false);
   const [columnSelection, setColumnSelection] = useState<ColumnSelection | null>(null);
@@ -182,4 +171,3 @@ export function useColumnSelection(
   };
 }
 
-export default useColumnSelection;

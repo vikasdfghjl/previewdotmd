@@ -10,32 +10,19 @@ export interface Command {
   category?: string;
 }
 
-interface UseCommandPaletteProps {
-  commands: Command[];
-}
-
-interface UseCommandPaletteReturn {
-  isOpen: boolean;
-  query: string;
-  filteredCommands: Command[];
-  selectedIndex: number;
-  open: () => void;
-  close: () => void;
-  toggle: () => void;
-  setQuery: (query: string) => void;
-  selectNext: () => void;
-  selectPrev: () => void;
-  executeSelected: () => void;
-}
-
 /**
  * useCommandPalette - Hook for managing command palette state
  * Provides fuzzy search and keyboard navigation
  */
-export function useCommandPalette({ commands }: UseCommandPaletteProps): UseCommandPaletteReturn {
+export function useCommandPalette({ commands }: { commands: Command[] }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState('');
+  const [query, setQueryState] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const setQuery = useCallback((newQuery: string) => {
+    setQueryState(newQuery);
+    setSelectedIndex(0);
+  }, []);
 
   // Filter and sort commands based on query
   const filteredCommands = useMemo(() => {
@@ -59,21 +46,16 @@ export function useCommandPalette({ commands }: UseCommandPaletteProps): UseComm
       .map(({ cmd }) => cmd);
   }, [commands, query]);
 
-  // Reset selection when query changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query]);
-
   const open = useCallback(() => {
     setIsOpen(true);
     setQuery('');
     setSelectedIndex(0);
-  }, []);
+  }, [setQuery]);
 
   const close = useCallback(() => {
     setIsOpen(false);
     setQuery('');
-  }, []);
+  }, [setQuery]);
 
   const toggle = useCallback(() => {
     if (isOpen) {
@@ -135,4 +117,3 @@ export function useCommandPalette({ commands }: UseCommandPaletteProps): UseComm
   };
 }
 
-export default useCommandPalette;

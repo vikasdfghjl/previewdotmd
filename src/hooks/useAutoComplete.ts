@@ -6,15 +6,6 @@ interface Suggestion {
   description?: string;
 }
 
-interface UseAutoCompleteReturn {
-  suggestions: Suggestion[];
-  selectedIndex: number;
-  isVisible: boolean;
-  handleInput: () => void;
-  handleKeyDown: (e: React.KeyboardEvent) => boolean;
-  insertSuggestion: (suggestion: Suggestion) => void;
-}
-
 // Markdown syntax suggestions
 const MARKDOWN_SUGGESTIONS: Suggestion[] = [
   { label: 'Heading 1', insertText: '# ', description: 'Large heading' },
@@ -43,7 +34,7 @@ const MARKDOWN_SUGGESTIONS: Suggestion[] = [
 export function useAutoComplete(
   textareaRef: React.RefObject<HTMLTextAreaElement | null>,
   markdown: string
-): UseAutoCompleteReturn {
+) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
@@ -183,4 +174,3 @@ export function useAutoComplete(
   };
 }
 
-export default useAutoComplete;

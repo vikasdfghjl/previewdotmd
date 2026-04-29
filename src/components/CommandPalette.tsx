@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Command } from '@/hooks/useCommandPalette';
-import { Icons } from '@/constants/icons';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -228,4 +227,3 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   );
 };
 
-export default CommandPalette;

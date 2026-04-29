@@ -40,7 +40,7 @@ const DEFAULT_STATE: LayoutState = {
   editorWidth: 50,
 };
 
-const LayoutContext = createContext<LayoutContextType | null>(null);
+const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<LayoutState>(DEFAULT_STATE);
@@ -111,7 +111,7 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
 
 export function useLayout(): LayoutContextType {
   const context = useContext(LayoutContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useLayout must be used within a LayoutProvider');
   }
   return context;

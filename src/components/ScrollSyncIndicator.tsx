@@ -49,4 +49,3 @@ export const ScrollSyncIndicator: React.FC<ScrollSyncIndicatorProps> = ({
   );
 };
 
-export default ScrollSyncIndicator;

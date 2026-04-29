@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, type ReactElement } from 'react';
+import React, { useState } from 'react';
 
 interface AnchorHeadingProps {
   level: 1 | 2 | 3 | 4 | 5 | 6;
@@ -145,4 +145,3 @@ export const AnchorHeading: React.FC<AnchorHeadingProps> = ({
   );
 };
 
-export default AnchorHeading;

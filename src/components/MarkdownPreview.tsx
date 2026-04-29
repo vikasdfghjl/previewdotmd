@@ -16,7 +16,7 @@ import { APP_CONFIG } from '@/constants/config';
 import { Icons } from '@/constants/icons';
 
 const MarkdownPreview: React.FC = () => {
-  const { markdown, handleChange, handleClear, handleReset } = useMarkdownState();
+  const { markdown, previewMarkdown, handleChange, handleClear, handleReset } = useMarkdownState();
   const {
     layoutMode,
     syncScroll,
@@ -31,7 +31,6 @@ const MarkdownPreview: React.FC = () => {
     setLayoutMode,
     toggleSyncScroll,
     setZoomLevel,
-    resetLayout,
   } = useLayout();
 
   const editorRef = useRef<EditorPanelRef>(null);
@@ -233,8 +232,8 @@ const MarkdownPreview: React.FC = () => {
 
   // Helper functions to get layout classes and styles
   const getMainClass = useCallback(() => {
-    if (readingMode) return 'flex-1 overflow-hidden';
-    if (fullscreen) return 'flex-1 overflow-hidden';
+    if (readingMode) return 'flex-1 flex overflow-hidden';
+    if (fullscreen) return 'flex-1 flex overflow-hidden';
     if (layoutMode === 'stacked') return 'flex-1 flex flex-col overflow-hidden';
     if (layoutMode === 'tabbed') return 'flex-1 flex flex-col overflow-hidden';
     return 'flex-1 flex overflow-hidden'; // split
@@ -281,8 +280,6 @@ const MarkdownPreview: React.FC = () => {
       {/* Header - hidden in fullscreen */}
       {!fullscreen && (
         <Header
-          onToggleFullscreen={toggleFullscreen}
-          onToggleReadingMode={toggleReadingMode}
           githubUrl={APP_CONFIG.github.url}
         />
       )}
@@ -320,6 +317,7 @@ const MarkdownPreview: React.FC = () => {
                 onFileUpload={handleFileUpload}
                 onDownload={downloadMarkdown}
                 onScroll={handleEditorScroll}
+                zoomLevel={zoomLevel}
               />
             </div>
 
@@ -327,7 +325,7 @@ const MarkdownPreview: React.FC = () => {
             <div className={getPreviewWrapperClass()}>
               <PreviewPanel
                 ref={previewRef}
-                markdown={markdown}
+                markdown={previewMarkdown}
                 isVisible={true}
                 onToggle={() => {}}
                 onExportHtml={exportAsHtml}
@@ -354,6 +352,7 @@ const MarkdownPreview: React.FC = () => {
                 onFileUpload={handleFileUpload}
                 onDownload={downloadMarkdown}
                 onScroll={handleEditorScroll}
+                zoomLevel={zoomLevel}
               />
             </div>
 
@@ -368,7 +367,7 @@ const MarkdownPreview: React.FC = () => {
             <div className={getPreviewWrapperClass()} style={getPreviewWrapperStyle()}>
               <PreviewPanel
                 ref={previewRef}
-                markdown={markdown}
+                markdown={previewMarkdown}
                 isVisible={true}
                 onToggle={() => {}}
                 onExportHtml={exportAsHtml}
@@ -395,6 +394,7 @@ const MarkdownPreview: React.FC = () => {
                 onFileUpload={handleFileUpload}
                 onDownload={downloadMarkdown}
                 onScroll={handleEditorScroll}
+                zoomLevel={zoomLevel}
               />
             </div>
 
@@ -402,7 +402,7 @@ const MarkdownPreview: React.FC = () => {
             <div className={getPreviewWrapperClass()}>
               <PreviewPanel
                 ref={previewRef}
-                markdown={markdown}
+                markdown={previewMarkdown}
                 isVisible={true}
                 onToggle={() => {}}
                 onExportHtml={exportAsHtml}

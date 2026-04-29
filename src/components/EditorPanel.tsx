@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle } from 'react';
+import React, { useRef, useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle, useDeferredValue } from 'react';
 import { ActionButton } from './ActionButton';
 import { PanelHeader } from './PanelHeader';
 import { FindReplace } from './FindReplace';
@@ -21,6 +21,7 @@ interface EditorPanelProps {
   onFileUpload?: (file: File) => void;
   onDownload?: () => void;
   onScroll?: (percentage: number) => void;
+  zoomLevel?: number;
 }
 
 export interface EditorPanelRef {
@@ -37,12 +38,16 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
   onFileUpload,
   onDownload,
   onScroll,
+  zoomLevel = 100,
 }, ref) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const isScrollingRef = useRef(false);
+
+  // Defer syntax highlighting to avoid blocking textarea input
+  const deferredMarkdown = useDeferredValue(markdown);
 
   const {
     isOpen: findReplaceOpen,
@@ -268,12 +273,14 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
 
         <div className="flex-1 relative">
           <SyntaxHighlightOverlay
-            markdown={markdown}
+            markdown={deferredMarkdown}
             activeBracketMatch={activeBracketMatch}
+            zoomLevel={zoomLevel}
           />
           <textarea
             ref={textareaRef}
             className="absolute inset-0 w-full h-full font-mono text-sm resize-none outline-none p-4 pt-4 pb-4 leading-5 bg-transparent text-transparent caret-gray-900 dark:caret-white focus:ring-2 focus:ring-inset focus:ring-blue-500/30"
+            style={{ fontSize: `${zoomLevel}%` }}
             value={markdown}
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}

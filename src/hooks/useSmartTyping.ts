@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-interface SmartTypingConfig {
+interface UseSmartTypingOptions {
   autoCloseBrackets: boolean;
   autoCloseQuotes: boolean;
   autoCloseMarkdown: boolean;
@@ -35,7 +35,7 @@ const MARKDOWN_PAIRS: Record<string, string> = {
  */
 export function useSmartTyping(
   textareaRef: React.RefObject<HTMLTextAreaElement | null>,
-  config: SmartTypingConfig = {
+  config: UseSmartTypingOptions = {
     autoCloseBrackets: true,
     autoCloseQuotes: true,
     autoCloseMarkdown: true,
@@ -206,4 +206,3 @@ export function useSmartTyping(
   return { handleKeyDown };
 }
 
-export default useSmartTyping;

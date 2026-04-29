@@ -1,17 +1,32 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import mermaid from 'mermaid';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface MermaidRendererProps {
   chart: string;
+}
+
+let mermaidInitialized = false;
+
+async function loadMermaid() {
+  const mermaid = (await import('mermaid')).default;
+  if (!mermaidInitialized) {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'strict',
+      fontFamily: 'inherit',
+    });
+    mermaidInitialized = true;
+  }
+  return mermaid;
 }
 
 /**
  * Mermaid Diagram Renderer
  *
  * Single Responsibility: Renders Mermaid diagrams from markdown code blocks
- * Uses lazy initialization for performance
+ * Uses dynamic import for code-splitting (~1MB off main bundle)
  */
 export const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -19,43 +34,36 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize mermaid only once
-  const initMermaid = useCallback(() => {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: 'default',
-      securityLevel: 'strict',
-      fontFamily: 'inherit',
-    });
-  }, []);
-
-  // Render the diagram
+  // Render the diagram via dynamic import
   useEffect(() => {
-    initMermaid();
+    if (!chart.trim()) return;
+
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
 
     const renderDiagram = async () => {
-      if (!chart.trim()) return;
-
-      setIsLoading(true);
-      setError(null);
-
       try {
-        // Generate unique ID for this diagram
-        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+        const mermaid = await loadMermaid();
+        if (cancelled) return;
 
-        // Render to SVG
+        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
         const { svg: renderedSvg } = await mermaid.render(id, chart.trim());
-        setSvg(renderedSvg);
+        if (!cancelled) setSvg(renderedSvg);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to render diagram');
-        setSvg('');
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Failed to render diagram');
+          setSvg('');
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
     renderDiagram();
-  }, [chart, initMermaid]);
+
+    return () => { cancelled = true; };
+  }, [chart]);
 
   if (isLoading) {
     return (

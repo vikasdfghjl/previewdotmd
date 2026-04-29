@@ -3,17 +3,12 @@
 import React from 'react';
 import { LayoutControls } from './LayoutControls';
 import { DarkModeToggle } from './DarkModeToggle';
-import { Icons } from '../constants/icons';
 
 interface HeaderProps {
-  onToggleFullscreen: () => void;
-  onToggleReadingMode: () => void;
   githubUrl: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-  onToggleFullscreen,
-  onToggleReadingMode,
   githubUrl,
 }) => {
   return (
@@ -40,22 +35,6 @@ export const Header: React.FC<HeaderProps> = ({
         <LayoutControls className="hidden md:flex" />
 
         <DarkModeToggle />
-
-        <button
-          onClick={onToggleReadingMode}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          title="Reading Mode"
-        >
-          <span className="w-5 h-5 text-secondary">{Icons.readingMode}</span>
-        </button>
-
-        <button
-          onClick={onToggleFullscreen}
-          className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          title="Toggle Fullscreen"
-        >
-          <span className="w-5 h-5 text-secondary">{Icons.fullscreen}</span>
-        </button>
 
         <a
           href={githubUrl}

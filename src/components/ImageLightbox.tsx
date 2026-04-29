@@ -185,4 +185,3 @@ export const ClickableImage: React.FC<ClickableImageProps> = ({
   );
 };
 
-export default ImageLightbox;

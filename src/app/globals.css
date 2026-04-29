@@ -370,18 +370,6 @@ textarea::placeholder {
   outline-offset: 2px;
 }
 
-/* Primary button variant */
-.btn-primary {
-  background-color: var(--accent-color);
-  color: white;
-  border-color: var(--accent-color);
-}
-
-.btn-primary:hover {
-  background-color: var(--accent-hover);
-  border-color: var(--accent-hover);
-}
-
 /* Text colors */
 .text-primary {
   color: var(--text-primary);
@@ -389,11 +377,6 @@ textarea::placeholder {
 
 .text-secondary {
   color: var(--text-secondary);
-}
-
-/* Border colors */
-.border-panel {
-  border-color: var(--panel-border);
 }
 
 /* Syntax highlighting for code blocks (Darcula-inspired theme) */
