@@ -119,6 +119,7 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({ children }) => {
             )}
             
             {/* Image */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={currentImage.src}
               alt={currentImage.alt}
@@ -170,6 +171,7 @@ export const ClickableImage: React.FC<ClickableImageProps> = ({
   const { openLightbox } = useLightbox();
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
       alt={alt}

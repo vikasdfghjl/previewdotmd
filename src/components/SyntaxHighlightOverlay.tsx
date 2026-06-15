@@ -78,8 +78,6 @@ function highlightBracketMatch(html: string, lineIndex: number, match: BracketMa
 
   if (isOpenLine && isCloseLine) {
     // Both on same line - this is rare but possible
-    const openCol = match.open.column;
-    const closeCol = match.close.column;
     // This is a simplified approach - for exact positioning we'd need character mapping
     return html; // Skip complex same-line case for now
   }

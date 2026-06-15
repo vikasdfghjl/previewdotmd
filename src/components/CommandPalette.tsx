@@ -140,7 +140,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 uppercase tracking-wider">
                     {category}
                   </div>
-                  {groupedCommands[category].map((cmd, idx) => {
+                  {groupedCommands[category].map((cmd) => {
                     // Find the actual index in the full commands array
                     const actualIndex = commands.findIndex(c => c.id === cmd.id);
                     const isSelected = actualIndex === selectedIndex;

@@ -429,7 +429,7 @@ const MarkdownPreview: React.FC = () => {
         commands={filteredCommands}
         selectedIndex={selectedCommandIndex}
         onQueryChange={setCommandQuery}
-        onSelect={(index) => {}}
+        onSelect={() => {}}
         onExecute={executeSelectedCommand}
         onClose={closeCommandPalette}
         onSelectNext={selectNextCommand}

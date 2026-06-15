@@ -1,4 +1,3 @@
-const CACHE_NAME = 'previewmd-v1';
 const STATIC_CACHE = 'previewmd-static-v1';
 const DYNAMIC_CACHE = 'previewmd-dynamic-v1';
 

@@ -277,6 +277,7 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
             activeBracketMatch={activeBracketMatch}
             zoomLevel={zoomLevel}
           />
+          {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props */}
           <textarea
             ref={textareaRef}
             className="absolute inset-0 w-full h-full font-mono text-sm resize-none outline-none p-4 pt-4 pb-4 leading-5 bg-transparent text-transparent caret-gray-900 dark:caret-white focus:ring-2 focus:ring-inset focus:ring-blue-500/30"

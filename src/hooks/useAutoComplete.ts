@@ -38,7 +38,6 @@ export function useAutoComplete(
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const [triggerPos, setTriggerPos] = useState(0);
   const lastInputRef = useRef('');
 
   const getCurrentWord = useCallback((): { word: string; start: number } => {
@@ -73,7 +72,6 @@ export function useAutoComplete(
         setSuggestions(filtered.slice(0, 8)); // Limit to 8 suggestions
         setIsVisible(true);
         setSelectedIndex(0);
-        setTriggerPos(textarea.selectionStart - word.length);
       } else if (filtered.length === 0) {
         setIsVisible(false);
       }
@@ -88,7 +86,7 @@ export function useAutoComplete(
     const textarea = textareaRef.current;
     if (!textarea) return;
 
-    const { word, start } = getCurrentWord();
+    const { start } = getCurrentWord();
     const end = textarea.selectionStart;
     
     // Replace the current word with the suggestion
