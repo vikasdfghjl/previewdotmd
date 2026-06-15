@@ -313,7 +313,6 @@ const MarkdownPreview: React.FC = () => {
                 onClear={handleClear}
                 onReset={handleReset}
                 isVisible={true}
-                onToggle={() => {}}
                 onFileUpload={handleFileUpload}
                 onDownload={downloadMarkdown}
                 onScroll={handleEditorScroll}
@@ -327,7 +326,6 @@ const MarkdownPreview: React.FC = () => {
                 ref={previewRef}
                 markdown={previewMarkdown}
                 isVisible={true}
-                onToggle={() => {}}
                 onExportHtml={exportAsHtml}
                 onExportPdf={exportAsPdf}
                 onExportPlainText={exportAsPlainText}
@@ -348,7 +346,6 @@ const MarkdownPreview: React.FC = () => {
                 onClear={handleClear}
                 onReset={handleReset}
                 isVisible={true}
-                onToggle={() => {}}
                 onFileUpload={handleFileUpload}
                 onDownload={downloadMarkdown}
                 onScroll={handleEditorScroll}
@@ -369,7 +366,6 @@ const MarkdownPreview: React.FC = () => {
                 ref={previewRef}
                 markdown={previewMarkdown}
                 isVisible={true}
-                onToggle={() => {}}
                 onExportHtml={exportAsHtml}
                 onExportPdf={exportAsPdf}
                 onExportPlainText={exportAsPlainText}
@@ -390,7 +386,6 @@ const MarkdownPreview: React.FC = () => {
                 onClear={handleClear}
                 onReset={handleReset}
                 isVisible={true}
-                onToggle={() => {}}
                 onFileUpload={handleFileUpload}
                 onDownload={downloadMarkdown}
                 onScroll={handleEditorScroll}
@@ -404,7 +399,6 @@ const MarkdownPreview: React.FC = () => {
                 ref={previewRef}
                 markdown={previewMarkdown}
                 isVisible={true}
-                onToggle={() => {}}
                 onExportHtml={exportAsHtml}
                 onExportPdf={exportAsPdf}
                 onExportPlainText={exportAsPlainText}

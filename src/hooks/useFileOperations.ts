@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 
 interface UseFileOperationsProps {
   markdown: string;
@@ -7,6 +7,11 @@ interface UseFileOperationsProps {
 
 export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperationsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const markdownRef = useRef(markdown);
+
+  useEffect(() => {
+    markdownRef.current = markdown;
+  }, [markdown]);
 
   const handleFileUpload = useCallback((file: File) => {
     if (!file.name.endsWith('.md') && !file.name.endsWith('.markdown')) {
@@ -48,7 +53,7 @@ export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperati
   }, [handleFileUpload]);
 
   const downloadMarkdown = useCallback(() => {
-    const blob = new Blob([markdown], { type: 'text/markdown' });
+    const blob = new Blob([markdownRef.current], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -57,7 +62,7 @@ export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperati
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [markdown]);
+  }, []);
 
   const exportAsHtml = useCallback(() => {
     const htmlContent = `<!DOCTYPE html>
@@ -113,7 +118,7 @@ export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperati
   </style>
 </head>
 <body>
-${markdown}
+${markdownRef.current}
 </body>
 </html>`;
 
@@ -126,10 +131,10 @@ ${markdown}
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [markdown]);
+  }, []);
 
   const exportAsPlainText = useCallback(() => {
-    const blob = new Blob([markdown], { type: 'text/plain' });
+    const blob = new Blob([markdownRef.current], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -138,7 +143,7 @@ ${markdown}
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [markdown]);
+  }, []);
 
   const exportAsPdf = useCallback(() => {
     const printWindow = window.open('', '_blank');
@@ -195,7 +200,7 @@ ${markdown}
           </style>
         </head>
         <body>
-          ${markdown}
+          ${markdownRef.current}
           <script>
             window.onload = function() {
               window.print();
@@ -206,7 +211,7 @@ ${markdown}
       `);
       printWindow.document.close();
     }
-  }, [markdown]);
+  }, []);
 
   return {
     fileInputRef,

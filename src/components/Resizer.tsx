@@ -15,6 +15,7 @@ export const Resizer: React.FC<ResizerProps> = ({
 }) => {
   const resizerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -29,11 +30,17 @@ export const Resizer: React.FC<ResizerProps> = ({
     const container = resizerRef.current?.parentElement;
     if (!container) return;
 
-    const rect = container.getBoundingClientRect();
-    const percentage = ((e.clientX - rect.left) / rect.width) * 100;
-    const clamped = Math.max(minPercent, Math.min(maxPercent, percentage));
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+    }
 
-    onResize(clamped);
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      const rect = container.getBoundingClientRect();
+      const percentage = ((e.clientX - rect.left) / rect.width) * 100;
+      const clamped = Math.max(minPercent, Math.min(maxPercent, percentage));
+      onResize(clamped);
+    });
   }, [onResize, minPercent, maxPercent]);
 
   const handleMouseUp = useCallback(() => {
@@ -49,6 +56,9 @@ export const Resizer: React.FC<ResizerProps> = ({
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
     };
   }, [handleMouseMove, handleMouseUp]);
 

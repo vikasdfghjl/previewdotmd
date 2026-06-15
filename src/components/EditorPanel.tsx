@@ -17,7 +17,7 @@ interface EditorPanelProps {
   onClear: () => void;
   onReset: () => void;
   isVisible: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
   onFileUpload?: (file: File) => void;
   onDownload?: () => void;
   onScroll?: (percentage: number) => void;

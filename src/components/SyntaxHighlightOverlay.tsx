@@ -116,7 +116,7 @@ function highlightCharAtPosition(html: string, position: number, className: stri
   return html;
 }
 
-export const SyntaxHighlightOverlay: React.FC<SyntaxHighlightOverlayProps> = ({
+export const SyntaxHighlightOverlay: React.FC<SyntaxHighlightOverlayProps> = React.memo(({
   markdown,
   activeBracketMatch,
   zoomLevel,
@@ -131,4 +131,6 @@ export const SyntaxHighlightOverlay: React.FC<SyntaxHighlightOverlayProps> = ({
       dangerouslySetInnerHTML={{ __html: highlightedHtml + '\n' }}
     />
   );
-};
+});
+
+SyntaxHighlightOverlay.displayName = 'SyntaxHighlightOverlay';

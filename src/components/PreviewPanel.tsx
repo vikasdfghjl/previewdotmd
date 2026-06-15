@@ -15,7 +15,7 @@ import 'katex/dist/katex.min.css';
 interface PreviewPanelProps {
   markdown: string;
   isVisible: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
   onExportHtml?: () => void;
   onExportPdf?: () => void;
   onExportPlainText?: () => void;
@@ -28,7 +28,7 @@ export interface PreviewPanelRef {
   scrollToPercentage: (percentage: number) => void;
 }
 
-export const PreviewPanel = forwardRef<PreviewPanelRef, PreviewPanelProps>(({
+export const PreviewPanel = React.memo(forwardRef<PreviewPanelRef, PreviewPanelProps>(({
   markdown,
   isVisible,
   onToggle,
@@ -215,6 +215,6 @@ export const PreviewPanel = forwardRef<PreviewPanelRef, PreviewPanelProps>(({
       </div>
     </div>
   );
-});
+}));
 
 PreviewPanel.displayName = 'PreviewPanel';

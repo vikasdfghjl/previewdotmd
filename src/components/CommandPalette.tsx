@@ -20,7 +20,7 @@ interface CommandPaletteProps {
  * CommandPalette - Modal command palette for quick access to all commands
  * Similar to VS Code's command palette (Ctrl+Shift+P)
  */
-export const CommandPalette: React.FC<CommandPaletteProps> = ({
+export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
   isOpen,
   query,
   commands,
@@ -225,5 +225,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       </div>
     </div>
   );
-};
+});
+
+CommandPalette.displayName = 'CommandPalette';
 
