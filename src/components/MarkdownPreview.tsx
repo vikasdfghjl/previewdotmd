@@ -93,7 +93,7 @@ const MarkdownPreview: React.FC = () => {
       id: 'view-reading',
       label: 'Toggle Reading Mode',
       description: 'Show preview only',
-      icon: Icons.readingMode,
+      icon: Icons.eye,
       action: toggleReadingMode,
       category: 'View',
     },

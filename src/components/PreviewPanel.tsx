@@ -74,7 +74,7 @@ export const PreviewPanel = React.memo(forwardRef<PreviewPanelRef, PreviewPanelP
         aria-controls="export-menu"
       >
         <div className="flex items-center gap-1.5">
-          {Icons.export}
+          {Icons.download}
           <span>Export</span>
         </div>
       </ActionButton>

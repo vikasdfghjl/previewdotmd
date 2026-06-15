@@ -3,6 +3,7 @@
 import React from 'react';
 import { LayoutControls } from './LayoutControls';
 import { DarkModeToggle } from './DarkModeToggle';
+import { Icons } from '@/constants/icons';
 
 interface HeaderProps {
   githubUrl: string;
@@ -12,13 +13,11 @@ export const Header: React.FC<HeaderProps> = ({
   githubUrl,
 }) => {
   return (
-    <header className="panel-header flex items-center justify-between px-6 py-3 border-b flex-shrink-0">
+    <header className="panel-header flex items-center justify-between px-5 py-3 border-b flex-shrink-0">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white">
+            {Icons.logo}
           </div>
           <h1 className="text-xl font-bold text-primary tracking-tight">
             Preview<span className="text-blue-500">.md</span>
