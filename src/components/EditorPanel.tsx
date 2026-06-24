@@ -254,6 +254,12 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
 
       <input ref={fileInputRef} type="file" accept=".md,.markdown" onChange={handleFileSelect} className="hidden" />
 
+      <FormattingToolbar
+        textareaRef={textareaRef}
+        markdown={markdown}
+        onChange={onChange}
+      />
+
       <div
         className="flex-1 relative flex overflow-hidden"
         onDragOver={handleDragOver}
@@ -269,12 +275,6 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
           currentMatch={currentMatch}
           onNext={goToNextMatch}
           onPrev={goToPrevMatch}
-        />
-
-        <FormattingToolbar
-          textareaRef={textareaRef}
-          markdown={markdown}
-          onChange={onChange}
         />
 
         <div
