@@ -6,312 +6,223 @@ const PREVIEW_DEBOUNCE_DELAY = 150; // ms - throttle preview re-renders
 
 const DEFAULT_MARKDOWN = `# Welcome to Preview.md 🚀
 
-A powerful, feature-rich **markdown editor** with live preview, designed for developers and writers.
+A powerful, offline-capable **Markdown editor** with live preview — write, preview, and export in one place. Designed for developers, writers, and anyone who works with Markdown.
+
+> 💡 **New here?** Try the **formatting toolbar** above the editor, press \`Ctrl+Shift+P\` for the **Command Palette**, or click headings in the preview to **copy anchor links**. Your work auto-saves to this browser.
 
 ---
 
-## ✨ Features Showcase
+## ✨ Quick Example: README Template
 
-### 📝 Rich Text Formatting
+Preview.md shines for writing project documentation. Here's a realistic README snippet:
 
-**Bold text**, *italic text*, ~~strikethrough~~, and ***bold italic*** — all the essentials for expressive writing.
+\`\`\`markdown
+# Project Name
 
-> 💡 **Pro Tip:** Use \`Ctrl+Shift+P\` to open the Command Palette for quick access to all features!
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+A brief description of what this project does and why it exists.
+
+## 🚀 Quick Start
+
+\`\`\`bash
+git clone https://github.com/user/repo.git
+cd repo
+npm install
+npm run dev
+\`\`\`
+
+## 📖 API Reference
+
+| Endpoint | Method | Description |
+|:---------|:-------|:------------|
+| \`/api/users\` | \`GET\` | List all users |
+| \`/api/users/:id\` | \`GET\` | Get user by ID |
+| \`/api/users\` | \`POST\` | Create a new user |
+| \`/api/users/:id\` | \`PATCH\` | Update user details |
+
+## 🧪 Testing
+
+\`\`\`bash
+npm test           # Run unit tests
+npm run test:e2e   # Run end-to-end tests
+\`\`\`
+
+## 📄 License
+
+MIT © 2026 Your Name
+\`\`\`
 
 ---
 
 ## 🎨 Code Highlighting
 
-Syntax highlighting for 100+ languages with beautiful themes:
+100+ languages with light & dark themes:
 
 \`\`\`typescript
-interface User {
-  id: number;
-  name: string;
-  email: string;
+// Generic API response handler
+interface ApiResponse<T> {
+  data: T;
+  meta: { page: number; total: number };
 }
 
-const createUser = (data: Omit<User, 'id'>): User => ({
-  id: Math.floor(Math.random() * 10000),
-  ...data,
-});
+async function fetchUsers(page = 1): Promise<ApiResponse<User[]>> {
+  const res = await fetch(\`/api/users?page=\${page}\`);
+  if (!res.ok) throw new Error(\`HTTP \${res.status}\`);
+  return res.json();
+}
 
-// Usage
-const user = createUser({
-  name: 'Alice Johnson',
-  email: 'alice@example.com',
-});
-
-console.log(\`Created user: \${user.name}\`);
+const { data: users, meta } = await fetchUsers(1);
+console.log(\`Loaded \${users.length} of \${meta.total} users\`);
 \`\`\`
 
 \`\`\`python
-# Python example with syntax highlighting
-def fibonacci(n: int) -> list[int]:
-    """Generate Fibonacci sequence up to n terms."""
-    if n <= 0:
-        return []
-    elif n == 1:
-        return [0]
-    
-    sequence = [0, 1]
-    while len(sequence) < n:
-        sequence.append(sequence[-1] + sequence[-2])
-    return sequence
+from dataclasses import dataclass
 
-# Generate first 10 Fibonacci numbers
-print(fibonacci(10))  # [0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+@dataclass
+class MarkdownConfig:
+    enable_math: bool = True
+    enable_diagrams: bool = True
+    theme: str = "auto"
+
+config = MarkdownConfig(theme="dark")
+print(f"Markdown engine ready — {config}")
 \`\`\`
-
-\`\`\`css
-/* Custom styling with CSS */
-.markdown-preview {
-  font-family: 'Geist', system-ui, sans-serif;
-  line-height: 1.6;
-  color: #1a1a1a;
-}
-
-.markdown-preview pre {
-  background: #f6f8fa;
-  border-radius: 8px;
-  padding: 1rem;
-}
-\`\`\`
-
----
-
-## 📊 Tables & Data
-
-| Feature | Status | Description |
-|:--------|:------:|:------------|
-| Live Preview | ✅ | Real-time markdown rendering |
-| Syntax Highlighting | ✅ | 100+ languages supported |
-| Math Equations | ✅ | KaTeX integration |
-| Diagrams | ✅ | Mermaid.js support |
-| Dark Mode | ✅ | Automatic theme switching |
-| PWA Support | ✅ | Works offline |
 
 ---
 
 ## 📐 Math Equations (KaTeX)
 
-Inline math: $E = mc^2$
+Inline math renders beautifully: the quadratic formula $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$ is a classic.
 
-Block equations:
-
-$$
-\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}
-$$
+Block equations with alignment:
 
 $$
 \\begin{aligned}
-\\nabla \\cdot \\mathbf{E} &= \\frac{\\rho}{\\varepsilon_0} \\\\
-\\nabla \\times \\mathbf{E} &= -\\frac{\\partial \\mathbf{B}}{\\partial t}
+f(x) &= x^3 - 3x^2 + 2x \\\\
+f'(x) &= 3x^2 - 6x + 2 \\\\
+f''(x) &= 6x - 6
 \\end{aligned}
 $$
 
-Matrix notation:
+Statistical notation:
 
 $$
-\\mathbf{A} = \\begin{bmatrix}
-a_{11} & a_{12} & a_{13} \\\\
-a_{21} & a_{22} & a_{23} \\\\
-a_{31} & a_{32} & a_{33}
-\\end{bmatrix}
+P(A|B) = \\frac{P(B|A) \\cdot P(A)}{P(B)}
 $$
 
 ---
 
 ## 📈 Diagrams (Mermaid)
 
-### Flowchart
+### Architecture Flow
 
 \`\`\`mermaid
-graph TD
-    A[Start] --> B{Is it working?}
-    B -->|Yes| C[Great! 🎉]
-    B -->|No| D[Debug]
-    D --> E[Fix Issues]
-    E --> B
-    C --> F[Deploy]
+graph LR
+    A[Browser] --> B[Cloudflare CDN]
+    B --> C[Next.js Static Export]
+    C --> D[Markdown Parser]
+    D --> E[React Renderer]
+    E --> F[Live Preview]
+
+    style A fill:#3b82f6,color:#fff
+    style F fill:#10b981,color:#fff
 \`\`\`
 
-### Sequence Diagram
+### User Journey
 
 \`\`\`mermaid
 sequenceDiagram
-    participant User
+    actor Writer
     participant Editor
+    participant Parser
     participant Preview
-    
-    User->>Editor: Type markdown
-    Editor->>Preview: Parse & render
-    Preview-->>User: Show live preview
-    
-    Note over Editor,Preview: Real-time sync
-\`\`\`
 
-### Gantt Chart
+    Writer->>Editor: Type markdown
+    Editor->>Parser: Parse after 150ms debounce
+    Parser->>Preview: Render HTML
+    Preview-->>Writer: Show live output
 
-\`\`\`mermaid
-gantt
-    title Project Timeline
-    dateFormat  YYYY-MM-DD
-    section Planning
-    Research           :done, a1, 2024-01-01, 7d
-    Design             :done, a2, after a1, 5d
-    section Development
-    Core Features      :active, a3, after a2, 14d
-    Advanced Features  :a4, after a3, 10d
-    section Launch
-    Testing            :a5, after a4, 7d
-    Deployment         :a6, after a5, 3d
+    Note over Editor,Preview: Bidirectional scroll sync
 \`\`\`
 
 ---
 
-## ✅ Task Lists
+## 📊 Feature Comparison
 
-- [x] Create markdown editor
-- [x] Add live preview
-- [x] Implement syntax highlighting
-- [x] Support math equations
-- [x] Add diagram rendering
-- [ ] AI-powered suggestions (coming soon)
-- [ ] Real-time collaboration (coming soon)
-
----
-
-## 🎯 Emoji Support
-
-Express yourself with emoji! :rocket: :sparkles: :heart:
-
-Common shortcuts work too:
-- :+1: → :+1:
-- :tada: → :tada:
-- :fire: → :fire:
-- :bug: → :bug:
-- :idea: → :bulb:
+| Capability | Preview.md | Other Editors | Notes |
+|:-----------|:----------:|:-------------:|:------|
+| Syntax Highlighting | ✅ 100+ lang | Usually ~20 | Via Prism |
+| Math Equations | ✅ KaTeX | ⚠️ MathJax only | Faster rendering |
+| Diagrams | ✅ Mermaid | ❌ Rare | Flowchart, sequence, Gantt |
+| Offline PWA | ✅ Full | ⚠️ Partial | Service worker caching |
+| Export Formats | ✅ HTML/PDF/TXT | ⚠️ Limited | One-click export |
+| Dark Mode | ✅ System-aware | ⚠️ Manual toggle | Auto-detects preference |
+| Command Palette | ✅ Ctrl+Shift+P | ❌ Rare | VS Code style |
+| Drag & Drop | ✅ .md files | ❌ Rare | Instant file loading |
+| Anchor Links | ✅ Click heading | ❌ Rare | Copy section URL |
 
 ---
 
-## 🔗 Links & References
-
-External links open in a new tab: [GitHub](https://github.com)
-
-Internal anchors work too: [Jump to Features](#-features-showcase)
-
----
-
-## 📖 Blockquotes & Callouts
-
-> **Note:** This is a standard blockquote.
-
-> **Warning:** Remember to save your work! The app auto-saves to localStorage.
-
-> 💡 **Tip:** Use \`Ctrl+K\` to quickly insert a link.
-
----
-
-## 📋 Lists
-
-### Unordered Lists
-
-- First level item
-  - Second level item
-    - Third level item
-  - Another second level
-- Back to first level
-
-### Ordered Lists
-
-1. First step
-2. Second step
-   1. Sub-step A
-   2. Sub-step B
-3. Third step
-
-### Mixed Lists
-
-1. Main task
-   - Subtask 1
-   - Subtask 2
-2. Another main task
-   - Detail A
-   - Detail B
-
----
-
-## 🖼️ Images
-
-Images are automatically centered and support click-to-enlarge:
-
-![Markdown Logo](https://upload.wikimedia.org/wikipedia/commons/4/48/Markdown-mark.svg)
-
-*The Markdown logo - click to enlarge!*
-
----
-
-## 🏷️ Definition Lists
-
-Term 1
-:   Definition of term 1
-
-Term 2
-:   Definition of term 2
-:   Another definition for term 2
-
----
-
-## 🎨 Horizontal Rules
-
-Use three or more dashes, asterisks, or underscores:
-
----
-
-***
-
-___
-
----
-
-## ⌨️ Keyboard Shortcuts Reference
+## ⌨️ Keyboard Shortcuts
 
 | Shortcut | Action |
 |:---------|:-------|
-| \`Ctrl+Shift+P\` | Open Command Palette |
+| \`Ctrl+Shift+P\` | Command Palette |
 | \`Ctrl+F\` | Find & Replace |
-| \`Ctrl+B\` | Bold text |
-| \`Ctrl+I\` | Italic text |
-| \`Ctrl+K\` | Insert link |
-| \`F11\` | Toggle fullscreen |
-| \`Ctrl++\` / \`Ctrl+-\` | Zoom in/out |
-| \`Tab\` | Indent |
-| \`Shift+Tab\` | Outdent |
+| \`Ctrl+B\` / \`Ctrl+I\` | Bold / Italic |
+| \`Ctrl+K\` | Insert Link |
+| \`F11\` | Toggle Fullscreen |
+| \`Ctrl++\` / \`Ctrl+-\` | Zoom In / Out |
+| \`Ctrl+0\` | Reset Zoom |
+| \`Tab\` / \`Shift+Tab\` | Indent / Outdent |
+| \`Escape\` | Exit fullscreen / reading mode |
 
 ---
 
-## 🚀 Getting Started
+## 📝 Writing Tips
 
-1. **Start typing** in the editor on the left
-2. **See the preview** update in real-time on the right
-3. **Try different layouts**: Split, Stacked, or Tabbed
-4. **Export your work**: HTML, PDF, or Markdown
-5. **Install as PWA**: Works offline!
-
----
-
-## 📝 Sample Text for Testing
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+- Use the **formatting toolbar** above the editor for quick access to common Markdown syntax
+- **Drag & drop** a \`.md\` file anywhere on the editor to load it instantly
+- Click any heading in the preview to **copy a direct link** to that section
+- Switch between **Split**, **Stacked**, and **Tabbed** layouts via the header controls
+- Enable **Sync Scroll** to keep editor and preview aligned while scrolling
+- Your content is **auto-saved** to this browser — export to a file for permanent storage
+- Install as a **PWA** for offline access (\`Ctrl+Shift+P\` → "Install")
 
 ---
 
-**Happy writing!** 🎉
+## 🧪 Advanced Formatting
 
-*Built with Next.js, React, TypeScript, and Tailwind CSS*
+**Rich text** with *emphasis*, ~~corrections~~, \`inline code\`, [links](https://example.com), and footnotes[^1].
+
+> Blockquotes support **nested formatting** and multi-paragraph content.
+>
+> — *Anonymous*
+
+### Task Lists
+
+- [x] Clone the repository
+- [x] Install dependencies
+- [x] Run the dev server
+- [ ] Write documentation
+- [ ] Deploy to production
+
+### Definition Lists
+
+Markdown
+: A lightweight markup language with plain-text formatting syntax.
+
+Preview.md
+: A modern Markdown editor with live preview, PWA support, and export capabilities.
+
+[^1]: This is a footnote. Footnotes are rendered at the bottom of the document with back-links.
+
+---
+
+**Happy writing!** 🎉 Built with Next.js, React, TypeScript, and Tailwind CSS.
+
+*Edit this content or click **Clear All** to start fresh. Your changes are saved automatically.*
 `;
 
 function loadFromStorage(): string | null {
