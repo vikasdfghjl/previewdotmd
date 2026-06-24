@@ -70,7 +70,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         >
           <span
             className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-400 group-hover:text-blue-500 transition-colors whitespace-nowrap"
-            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+            style={{ writingMode: 'vertical-rl' }}
           >
             Table of Contents
           </span>
