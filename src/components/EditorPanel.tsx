@@ -9,6 +9,7 @@ import { useBracketMatching } from '@/hooks/useBracketMatching';
 import { useSmartTyping } from '@/hooks/useSmartTyping';
 import { useColumnSelection } from '@/hooks/useColumnSelection';
 import { useAutoComplete } from '@/hooks/useAutoComplete';
+import { scrollToPercentage, getScrollPercentage } from '@/lib/scroll';
 import { Icons } from '@/constants/icons';
 
 interface EditorPanelProps {
@@ -102,14 +103,9 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
 
   useImperativeHandle(ref, () => ({
     scrollToPercentage: (percentage: number) => {
-      if (!textareaRef.current) return;
-      isScrollingRef.current = true;
-      const el = textareaRef.current;
-      const scrollHeight = el.scrollHeight - el.clientHeight;
-      el.scrollTop = scrollHeight * percentage;
-      requestAnimationFrame(() => {
-        isScrollingRef.current = false;
-      });
+      if (textareaRef.current) {
+        scrollToPercentage(textareaRef.current, percentage, isScrollingRef);
+      }
     },
   }));
 
@@ -121,10 +117,7 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
       lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
     }
     if (textareaRef.current && !isScrollingRef.current) {
-      const el = textareaRef.current;
-      const scrollHeight = el.scrollHeight - el.clientHeight;
-      const percentage = scrollHeight > 0 ? el.scrollTop / scrollHeight : 0;
-      onScroll?.(percentage);
+      onScroll?.(getScrollPercentage(textareaRef.current));
     }
   }, [onScroll]);
 

@@ -69,57 +69,39 @@ export function useBracketMatching(content: string) {
 
   const matches = useMemo(() => findAllMatches(content), [content, findAllMatches]);
 
-  // Handle cursor position change
+  // Handle cursor position change — checks both the character at the cursor
+  // and the character just before, for both open and close brackets.
   const handleCursorChange = useCallback((cursorLine: number, cursorColumn: number) => {
-    const text = contentRef.current;
-    const lines = text.split('\n');
-
-    // Check if cursor is at or just after an opening bracket
-    const currentLine = lines[cursorLine] || '';
+    const currentLine = contentRef.current.split('\n')[cursorLine] || '';
     const charAtCursor = currentLine[cursorColumn];
     const charBeforeCursor = cursorColumn > 0 ? currentLine[cursorColumn - 1] : null;
 
     let foundMatch: BracketMatch | null = null;
-    let isInBracket = false;
 
-    // Check character at cursor (opening bracket)
-    if (charAtCursor && charAtCursor in BRACKET_PAIRS) {
-      const match = matches.find(m => m.open.line === cursorLine && m.open.column === cursorColumn);
-      if (match) {
-        foundMatch = match;
-        isInBracket = true;
+    // Try each position/offset — short-circuit on first match
+    for (const offset of [0, -1]) {
+      const char = offset === 0 ? charAtCursor : charBeforeCursor;
+      if (!char) continue;
+
+      // Check as opening bracket
+      if (char in BRACKET_PAIRS) {
+        foundMatch = matches.find(m =>
+          m.open.line === cursorLine && m.open.column === cursorColumn + offset
+        ) ?? null;
+        if (foundMatch) break;
       }
-    }
 
-    // Check character before cursor (opening bracket)
-    if (!foundMatch && charBeforeCursor && charBeforeCursor in BRACKET_PAIRS) {
-      const match = matches.find(m => m.open.line === cursorLine && m.open.column === cursorColumn - 1);
-      if (match) {
-        foundMatch = match;
-        isInBracket = true;
-      }
-    }
-
-    // Check character at cursor (closing bracket)
-    if (!foundMatch && charAtCursor && CLOSE_BRACKETS.has(charAtCursor)) {
-      const match = matches.find(m => m.close.line === cursorLine && m.close.column === cursorColumn);
-      if (match) {
-        foundMatch = match;
-        isInBracket = true;
-      }
-    }
-
-    // Check character before cursor (closing bracket)
-    if (!foundMatch && charBeforeCursor && CLOSE_BRACKETS.has(charBeforeCursor)) {
-      const match = matches.find(m => m.close.line === cursorLine && m.close.column === cursorColumn - 1);
-      if (match) {
-        foundMatch = match;
-        isInBracket = true;
+      // Check as closing bracket
+      if (CLOSE_BRACKETS.has(char)) {
+        foundMatch = matches.find(m =>
+          m.close.line === cursorLine && m.close.column === cursorColumn + offset
+        ) ?? null;
+        if (foundMatch) break;
       }
     }
 
     setActiveMatch(foundMatch);
-    setCursorInBracket(isInBracket);
+    setCursorInBracket(foundMatch !== null);
   }, [matches]);
 
   return {

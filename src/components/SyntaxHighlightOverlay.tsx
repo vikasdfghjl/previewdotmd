@@ -9,46 +9,42 @@ interface SyntaxHighlightOverlayProps {
   zoomLevel?: number;
 }
 
-const highlightMarkdown = (text: string, activeBracketMatch?: BracketMatch | null): string => {
+/** Syntax highlighting rules — data-driven so new rules can be added without modifying logic. */
+const SYNTAX_RULES: Array<{ pattern: RegExp; className: string; replacement?: string }> = [
+  // Headers
+  { pattern: /^(#{1,6}\s.*?)$/, className: 'text-purple-600 dark:text-purple-400 font-bold' },
+  // Bold
+  { pattern: /(\*\*|__)(.*?)\1/g, className: 'text-blue-600 dark:text-blue-400 font-bold' },
+  // Italic
+  { pattern: /(?<!\*)\*([^*]+)\*(?!\*)/g, className: 'text-blue-500 dark:text-blue-300 italic' },
+  // Code blocks
+  { pattern: /(```|~~~)(\w*)/g, className: 'text-green-600 dark:text-green-400' },
+  // Inline code
+  { pattern: /`([^`]+)`/g, className: 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-0.5 rounded' },
+  // Links
+  { pattern: /\[([^\]]+)\]\(([^)]+)\)/g, className: 'text-cyan-600 dark:text-cyan-400' },
+  // Images
+  { pattern: /!\[([^\]]+)\]\(([^)]+)\)/g, className: 'text-cyan-600 dark:text-cyan-400' },
+  // Blockquotes
+  { pattern: /^(&gt;\s.*?)$/, className: 'text-gray-500 dark:text-gray-400' },
+  // Unordered lists
+  { pattern: /^(\s*[-*+]\s)/, className: 'text-orange-500' },
+  // Ordered lists
+  { pattern: /^(\s*\d+\.\s)/, className: 'text-orange-500' },
+  // Horizontal rules
+  { pattern: /^([-*_]{3,})$/, className: 'text-gray-400' },
+];
+
+function highlightMarkdown(text: string, activeBracketMatch?: BracketMatch | null): string {
   const lines = text.split('\n');
 
   return lines.map((line, lineIndex) => {
-    // Escape HTML entities first
     let html = escapeHtml(line);
 
-    // Apply syntax highlighting
-    // Headers
-    html = html.replace(/^(#{1,6}\s.*?)$/, '<span class="text-purple-600 dark:text-purple-400 font-bold">$1</span>');
-
-    // Bold
-    html = html.replace(/(\*\*|__)(.*?)\1/g, '<span class="text-blue-600 dark:text-blue-400 font-bold">$1$2$1</span>');
-
-    // Italic
-    html = html.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<span class="text-blue-500 dark:text-blue-300 italic">*$1*</span>');
-
-    // Code blocks
-    html = html.replace(/(```|~~~)(\w*)/g, '<span class="text-green-600 dark:text-green-400">$1$2</span>');
-
-    // Inline code
-    html = html.replace(/`([^`]+)`/g, '<span class="text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-0.5 rounded">`$1`</span>');
-
-    // Links
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<span class="text-cyan-600 dark:text-cyan-400">[$1]($2)</span>');
-
-    // Images
-    html = html.replace(/!\[([^\]]+)\]\(([^)]+)\)/g, '<span class="text-cyan-600 dark:text-cyan-400">![$1]($2)</span>');
-
-    // Blockquotes
-    html = html.replace(/^(&gt;\s.*?)$/, '<span class="text-gray-500 dark:text-gray-400">$1</span>');
-
-    // Unordered lists
-    html = html.replace(/^(\s*[-*+]\s)/, '<span class="text-orange-500">$1</span>');
-
-    // Ordered lists
-    html = html.replace(/^(\s*\d+\.\s)/, '<span class="text-orange-500">$1</span>');
-
-    // Horizontal rules
-    html = html.replace(/^([-*_]{3,})$/, '<span class="text-gray-400">$1</span>');
+    // Apply each syntax rule in order
+    for (const { pattern, className } of SYNTAX_RULES) {
+      html = html.replace(pattern, `<span class="${className}">$1</span>`);
+    }
 
     // Bracket matching highlighting
     if (activeBracketMatch) {
@@ -57,7 +53,7 @@ const highlightMarkdown = (text: string, activeBracketMatch?: BracketMatch | nul
 
     return html;
   }).join('\n');
-};
+}
 
 function escapeHtml(text: string): string {
   return text

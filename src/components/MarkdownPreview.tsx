@@ -4,7 +4,7 @@ import React, { useCallback, useRef, useEffect, useMemo } from 'react';
 import { useMarkdownState } from '@/hooks/useMarkdownState';
 import { useFileOperations } from '@/hooks/useFileOperations';
 import { useLayout } from '@/contexts/LayoutContext';
-import { useCommandPalette, Command } from '@/hooks/useCommandPalette';
+import { useCommandPalette } from '@/hooks/useCommandPalette';
 import { EditorPanel, EditorPanelRef } from './EditorPanel';
 import { PreviewPanel, PreviewPanelRef } from './PreviewPanel';
 import { LayoutControls } from './LayoutControls';
@@ -14,6 +14,7 @@ import { TabBar } from './TabBar';
 import { CommandPalette } from './CommandPalette';
 import { APP_CONFIG } from '@/constants/config';
 import { Icons } from '@/constants/icons';
+import { createCommands } from '@/constants/commands';
 
 const MarkdownPreview: React.FC = () => {
   const { markdown, previewMarkdown, handleChange, handleClear, handleReset } = useMarkdownState();
@@ -49,146 +50,31 @@ const MarkdownPreview: React.FC = () => {
     exportAsPlainText,
   } = useFileOperations({ markdown, onMarkdownChange: handleChange });
 
-  // Define all available commands
-  const commands = useMemo<Command[]>(() => [
-    {
-      id: 'file-new',
-      label: 'New Document',
-      description: 'Clear the editor and start fresh',
-      shortcut: 'Ctrl+Shift+N',
-      icon: Icons.document,
-      action: handleClear,
-      category: 'File',
-    },
-    {
-      id: 'file-download',
-      label: 'Download Markdown',
-      description: 'Save current document as .md file',
-      shortcut: 'Ctrl+S',
-      icon: Icons.download,
-      action: downloadMarkdown,
-      category: 'File',
-    },
-    {
-      id: 'file-export-html',
-      label: 'Export as HTML',
-      description: 'Export formatted preview as HTML',
-      icon: Icons.code,
-      action: exportAsHtml,
-      category: 'File',
-    },
-    {
-      id: 'file-export-pdf',
-      label: 'Export as PDF',
-      description: 'Export formatted preview as PDF',
-      icon: Icons.file,
-      action: exportAsPdf,
-      category: 'File',
-    },
-    {
-      id: 'view-fullscreen',
-      label: 'Toggle Fullscreen',
-      description: 'Enter or exit fullscreen mode',
-      shortcut: 'F11',
-      icon: Icons.fullscreen,
-      action: toggleFullscreen,
-      category: 'View',
-    },
-    {
-      id: 'view-reading',
-      label: 'Toggle Reading Mode',
-      description: 'Show preview only',
-      icon: Icons.eye,
-      action: toggleReadingMode,
-      category: 'View',
-    },
-    {
-      id: 'view-sync-scroll',
-      label: 'Toggle Sync Scroll',
-      description: 'Synchronize editor and preview scrolling',
-      icon: Icons.syncScroll,
-      action: toggleSyncScroll,
-      category: 'View',
-    },
-    {
-      id: 'view-zoom-in',
-      label: 'Zoom In',
-      description: 'Increase preview zoom level',
-      shortcut: 'Ctrl++',
-      icon: Icons.zoomIn,
-      action: () => setZoomLevel(zoomLevelRef.current + 10),
-      category: 'View',
-    },
-    {
-      id: 'view-zoom-out',
-      label: 'Zoom Out',
-      description: 'Decrease preview zoom level',
-      shortcut: 'Ctrl+-',
-      icon: Icons.zoomOut,
-      action: () => setZoomLevel(zoomLevelRef.current - 10),
-      category: 'View',
-    },
-    {
-      id: 'view-zoom-reset',
-      label: 'Reset Zoom',
-      description: 'Reset zoom to 100%',
-      shortcut: 'Ctrl+0',
-      action: () => setZoomLevel(100),
-      category: 'View',
-    },
-    {
-      id: 'layout-split',
-      label: 'Split Layout',
-      description: 'Show editor and preview side by side',
-      icon: Icons.split,
-      action: () => setLayoutMode('split'),
-      category: 'Layout',
-    },
-    {
-      id: 'layout-stacked',
-      label: 'Stacked Layout',
-      description: 'Show editor above preview',
-      icon: Icons.stacked,
-      action: () => setLayoutMode('stacked'),
-      category: 'Layout',
-    },
-    {
-      id: 'layout-tabbed',
-      label: 'Tabbed Layout',
-      description: 'Switch between editor and preview',
-      icon: Icons.tabbed,
-      action: () => setLayoutMode('tabbed'),
-      category: 'Layout',
-    },
-    {
-      id: 'edit-find',
-      label: 'Find and Replace',
-      description: 'Search and replace text',
-      shortcut: 'Ctrl+F',
-      icon: Icons.search,
-      action: () => {
-        // Focus editor and trigger find
-        editorRef.current?.scrollToPercentage(0);
-      },
-      category: 'Edit',
-    },
-    {
-      id: 'edit-reset',
-      label: 'Reset to Example',
-      description: 'Load example markdown',
-      icon: Icons.reset,
-      action: handleReset,
-      category: 'Edit',
-    },
-    {
-      id: 'app-help',
-      label: 'Open GitHub',
-      description: 'View source code on GitHub',
-      icon: Icons.logo,
-      action: () => window.open(APP_CONFIG.github.url, '_blank'),
-      category: 'Help',
-    },
-  ], [handleClear, downloadMarkdown, exportAsHtml, exportAsPdf, toggleFullscreen, toggleReadingMode, toggleSyncScroll, setZoomLevel, setLayoutMode, handleReset]);
+  // Define all available commands (extracted — see src/constants/commands.tsx)
+  const commands = useMemo(() => createCommands({
+    handleClear,
+    downloadMarkdown,
+    exportAsHtml,
+    exportAsPdf,
+    toggleFullscreen,
+    toggleReadingMode,
+    toggleSyncScroll,
+    setZoomLevel,
+    zoomLevelRef,
+    setLayoutMode,
+    handleReset,
+  }), [
+    handleClear,
+    downloadMarkdown,
+    exportAsHtml,
+    exportAsPdf,
+    toggleFullscreen,
+    toggleReadingMode,
+    toggleSyncScroll,
+    setZoomLevel,
+    setLayoutMode,
+    handleReset,
+  ]);
 
   // Command palette hook
   const {
@@ -235,36 +121,20 @@ const MarkdownPreview: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [fullscreen, readingMode, toggleFullscreen, toggleReadingMode]);
 
-  // Helper functions to get layout classes and styles
-  const getMainClass = useCallback(() => {
-    if (readingMode) return 'flex-1 flex overflow-hidden';
-    if (fullscreen) return 'flex-1 flex overflow-hidden';
-    if (layoutMode === 'stacked') return 'flex-1 flex flex-col overflow-hidden';
-    if (layoutMode === 'tabbed') return 'flex-1 flex flex-col overflow-hidden';
-    return 'flex-1 flex overflow-hidden'; // split
-  }, [readingMode, fullscreen, layoutMode]);
-
-  const getEditorWrapperStyle = useCallback(() => {
-    if (layoutMode === 'split') {
-      return { width: `${editorWidth}%` };
-    }
-    return {};
-  }, [editorWidth, layoutMode]);
-
-  const getPreviewWrapperStyle = useCallback(() => {
-    if (layoutMode === 'split') {
-      return { width: `${100 - editorWidth}%` };
-    }
-    return {};
-  }, [editorWidth, layoutMode]);
-
-  const getContainerClass = useCallback(() => {
-    if (fullscreen) return 'fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col';
-    return 'flex flex-col h-dvh w-full relative';
-  }, [fullscreen]);
+  // Layout configuration — single useMemo replaces 4 separate useCallbacks
+  const layoutConfig = useMemo(() => ({
+    containerClass: fullscreen
+      ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col'
+      : 'flex flex-col h-dvh w-full relative',
+    mainClass: (readingMode || fullscreen || layoutMode === 'split')
+      ? 'flex-1 flex overflow-hidden'
+      : 'flex-1 flex flex-col overflow-hidden',
+    editorStyle: layoutMode === 'split' ? { width: `${editorWidth}%` } : ({} as React.CSSProperties),
+    previewStyle: layoutMode === 'split' ? { width: `${100 - editorWidth}%` } : ({} as React.CSSProperties),
+  }), [readingMode, fullscreen, layoutMode, editorWidth]);
 
   return (
-    <div className={getContainerClass()}>
+    <div className={layoutConfig.containerClass}>
       {/* Header - hidden in fullscreen */}
       {!fullscreen && (
         <Header
@@ -278,10 +148,9 @@ const MarkdownPreview: React.FC = () => {
           onClick={toggleFullscreen}
           className="absolute top-4 right-4 z-50 p-2 rounded-lg bg-gray-800/80 text-white hover:bg-gray-800 transition-colors"
           title="Exit fullscreen (Escape)"
+          aria-label="Exit fullscreen"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <span className="w-5 h-5">{Icons.close}</span>
         </button>
       )}
 
@@ -289,7 +158,7 @@ const MarkdownPreview: React.FC = () => {
       {layoutMode === 'tabbed' && !readingMode && <TabBar />}
 
       {/* Main Content Area */}
-      <main id="main-content" className={getMainClass()}>
+      <main id="main-content" className={layoutConfig.mainClass}>
         {layoutMode === 'stacked' ? (
           <>
             {/* Editor Panel - Stacked (skip mount entirely in reading mode) */}
@@ -329,7 +198,7 @@ const MarkdownPreview: React.FC = () => {
           <>
             {/* Editor Panel - Split (skip mount entirely in reading mode) */}
             {!readingMode && (
-              <div className="min-w-0 overflow-hidden" style={getEditorWrapperStyle()}>
+              <div className="min-w-0 overflow-hidden" style={layoutConfig.editorStyle}>
                 <EditorPanel
                   ref={editorRef}
                   markdown={markdown}
@@ -355,7 +224,7 @@ const MarkdownPreview: React.FC = () => {
             )}
 
             {/* Preview Panel - Split */}
-            <div className="min-w-0 overflow-hidden" style={readingMode ? undefined : getPreviewWrapperStyle()}>
+            <div className="min-w-0 overflow-hidden" style={readingMode ? undefined : layoutConfig.previewStyle}>
               <PreviewPanel
                 ref={previewRef}
                 markdown={previewMarkdown}

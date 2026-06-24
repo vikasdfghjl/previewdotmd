@@ -7,6 +7,7 @@ import { ScrollSyncIndicator } from './ScrollSyncIndicator';
 import { AnchorHeading } from './AnchorHeading';
 import { ImageLightbox, ClickableImage } from './ImageLightbox';
 import { remarkPlugins, rehypePlugins } from '@/lib/markdownPlugins';
+import { scrollToPercentage, getScrollPercentage } from '@/lib/scroll';
 import { Icons } from '@/constants/icons';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -49,14 +50,9 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
 
   useImperativeHandle(ref, () => ({
     scrollToPercentage: (percentage: number) => {
-      if (!scrollContainerRef.current) return;
-      isScrollingRef.current = true;
-      const el = scrollContainerRef.current;
-      const scrollHeight = el.scrollHeight - el.clientHeight;
-      el.scrollTop = scrollHeight * percentage;
-      requestAnimationFrame(() => {
-        isScrollingRef.current = false;
-      });
+      if (scrollContainerRef.current) {
+        scrollToPercentage(scrollContainerRef.current, percentage, isScrollingRef);
+      }
     },
   }));
 
@@ -87,10 +83,7 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
 
   const handleScroll = () => {
     if (!scrollContainerRef.current || isScrollingRef.current) return;
-    const el = scrollContainerRef.current;
-    const scrollHeight = el.scrollHeight - el.clientHeight;
-    const percentage = scrollHeight > 0 ? el.scrollTop / scrollHeight : 0;
-    onScroll?.(percentage);
+    onScroll?.(getScrollPercentage(scrollContainerRef.current));
   };
 
   const exportActions = (
@@ -121,39 +114,24 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
             aria-label="Export options"
             className="absolute right-0 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20"
           >
-            {onExportHtml && (
-              <button
-                role="menuitem"
-                onClick={() => { onExportHtml(); setShowExportMenu(false); }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
-                aria-label="Export markdown as HTML file"
-              >
-                {Icons.code}
-                Export as HTML
-              </button>
-            )}
-            {onExportPdf && (
-              <button
-                role="menuitem"
-                onClick={() => { onExportPdf(); setShowExportMenu(false); }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
-                aria-label="Export markdown as PDF file"
-              >
-                {Icons.file}
-                Export as PDF
-              </button>
-            )}
-            {onExportPlainText && (
-              <button
-                role="menuitem"
-                onClick={() => { onExportPlainText(); setShowExportMenu(false); }}
-                className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
-                aria-label="Export markdown as plain text file"
-              >
-                {Icons.document}
-                Export as Plain Text
-              </button>
-            )}
+            {[
+              { action: onExportHtml, icon: Icons.code, label: 'Export as HTML', ariaLabel: 'Export markdown as HTML file' },
+              { action: onExportPdf, icon: Icons.file, label: 'Export as PDF', ariaLabel: 'Export markdown as PDF file' },
+              { action: onExportPlainText, icon: Icons.document, label: 'Export as Plain Text', ariaLabel: 'Export markdown as plain text file' },
+            ]
+              .filter(({ action }) => action)
+              .map(({ action, icon, label, ariaLabel }) => (
+                <button
+                  key={label}
+                  role="menuitem"
+                  onClick={() => { action!(); setShowExportMenu(false); }}
+                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+                  aria-label={ariaLabel}
+                >
+                  {icon}
+                  {label}
+                </button>
+              ))}
           </div>
         </>
       )}
@@ -185,9 +163,7 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
           {markdown.trim() === '' ? (
             <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center">
               <div className="w-16 h-16 mb-4 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <span className="w-8 h-8 text-gray-400">{Icons.document}</span>
               </div>
               <h3 className="text-lg font-medium text-primary mb-2">No markdown content</h3>
               <p className="text-sm text-secondary max-w-sm">

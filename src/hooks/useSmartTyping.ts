@@ -73,56 +73,21 @@ export function useSmartTyping(
     const value = textarea.value;
     const hasSelection = start !== end;
 
-    // Handle auto-closing brackets
-    if (config.autoCloseBrackets && key in BRACKET_PAIRS) {
-      e.preventDefault();
-      const closeChar = BRACKET_PAIRS[key];
-      
-      if (hasSelection) {
-        // Wrap selection with brackets
-        const selectedText = value.substring(start, end);
-        const newText = key + selectedText + closeChar;
-        insertText(newText, 0, 0);
-        // Select the text inside brackets
-        textarea.setSelectionRange(start + 1, start + 1 + selectedText.length);
-      } else {
-        // Insert pair and place cursor in middle
-        insertText(key + closeChar, 1, 0);
-      }
-      return true;
-    }
+    // Generic auto-closing for brackets, quotes, and markdown pairs
+    const pairMap =
+      config.autoCloseBrackets && key in BRACKET_PAIRS   ? BRACKET_PAIRS
+    : config.autoCloseQuotes   && key in QUOTE_PAIRS      ? QUOTE_PAIRS
+    : config.autoCloseMarkdown && key in MARKDOWN_PAIRS   ? MARKDOWN_PAIRS
+    : null;
 
-    // Handle auto-closing quotes
-    if (config.autoCloseQuotes && key in QUOTE_PAIRS) {
+    if (pairMap) {
       e.preventDefault();
-      const closeChar = QUOTE_PAIRS[key];
-      
+      const closeChar = pairMap[key];
       if (hasSelection) {
-        // Wrap selection with quotes
         const selectedText = value.substring(start, end);
-        const newText = key + selectedText + closeChar;
-        insertText(newText, 0, 0);
+        insertText(key + selectedText + closeChar, 0, 0);
         textarea.setSelectionRange(start + 1, start + 1 + selectedText.length);
       } else {
-        // Insert pair and place cursor in middle
-        insertText(key + closeChar, 1, 0);
-      }
-      return true;
-    }
-
-    // Handle auto-closing markdown pairs
-    if (config.autoCloseMarkdown && key in MARKDOWN_PAIRS) {
-      e.preventDefault();
-      const closeChar = MARKDOWN_PAIRS[key];
-      
-      if (hasSelection) {
-        // Wrap selection with markdown chars
-        const selectedText = value.substring(start, end);
-        const newText = key + selectedText + closeChar;
-        insertText(newText, 0, 0);
-        textarea.setSelectionRange(start + 1, start + 1 + selectedText.length);
-      } else {
-        // Insert pair and place cursor in middle
         insertText(key + closeChar, 1, 0);
       }
       return true;
