@@ -8,6 +8,8 @@ import { AnchorHeading } from './AnchorHeading';
 import { ImageLightbox, ClickableImage } from './ImageLightbox';
 import { remarkPlugins, rehypePlugins } from '@/lib/markdownPlugins';
 import { scrollToPercentage, getScrollPercentage } from '@/lib/scroll';
+import { useHeadings } from '@/hooks/useHeadings';
+import { TableOfContents } from './TableOfContents';
 import { Icons } from '@/constants/icons';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -44,6 +46,7 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
 }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const headings = useHeadings(markdown);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
@@ -149,16 +152,17 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
         isHidden={!isVisible}
       />
       
-      {/* Preview container with improved scrolling */}
-      <div
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-auto"
-      >
+      {/* Preview container with TOC sidebar */}
+      <div className="flex flex-1 min-h-0">
         <div
-          className="p-6 max-w-none"
-          style={{ fontSize: `${zoomLevel}%` }}
+          ref={scrollContainerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-auto"
         >
+          <div
+            className="p-6 max-w-none"
+            style={{ fontSize: `${zoomLevel}%` }}
+          >
           {/* Empty state when no content */}
           {markdown.trim() === '' ? (
             <div className="flex flex-col items-center justify-center h-full min-h-[400px] text-center">
@@ -185,7 +189,9 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
           )}
         </div>
       </div>
-      
+      <TableOfContents headings={headings} scrollContainerRef={scrollContainerRef} />
+    </div>
+
       {/* Footer with preview info */}
       <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-secondary">

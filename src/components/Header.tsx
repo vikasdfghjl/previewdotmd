@@ -3,6 +3,7 @@
 import React from 'react';
 import { LayoutControls } from './LayoutControls';
 import { DarkModeToggle } from './DarkModeToggle';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Icons } from '@/constants/icons';
 
 interface HeaderProps {
@@ -12,6 +13,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   githubUrl,
 }) => {
+  const { showInstall, promptInstall } = useInstallPrompt();
+
   return (
     <header className="panel-header flex items-center justify-between px-5 py-3 border-b flex-shrink-0">
       <div className="flex items-center gap-4">
@@ -34,6 +37,19 @@ export const Header: React.FC<HeaderProps> = ({
         <LayoutControls className="hidden md:flex" />
 
         <DarkModeToggle />
+
+        {showInstall && (
+          <button
+            onClick={promptInstall}
+            className="p-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors flex items-center gap-1.5 text-sm font-medium"
+            title="Install Preview.md as an app"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span className="hidden sm:inline">Install</span>
+          </button>
+        )}
 
         <a
           href={githubUrl}

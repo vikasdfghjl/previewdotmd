@@ -341,6 +341,7 @@ export function useMarkdownState(initialValue?: string) {
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   // Debounce preview rendering to reduce re-renders on fast typing
   useEffect(() => {
@@ -366,6 +367,7 @@ export function useMarkdownState(initialValue?: string) {
     saveTimeoutRef.current = setTimeout(() => {
       saveToStorage(markdown);
       setLastSaved(new Date());
+      setIsDirty(false);
     }, AUTOSAVE_DELAY);
 
     return () => {
@@ -377,14 +379,17 @@ export function useMarkdownState(initialValue?: string) {
 
   const handleChange = useCallback((value: string) => {
     setMarkdown(value);
+    setIsDirty(true);
   }, []);
 
   const handleClear = useCallback(() => {
     setMarkdown('');
+    setIsDirty(true);
   }, []);
 
   const handleReset = useCallback(() => {
     setMarkdown(DEFAULT_MARKDOWN);
+    setIsDirty(true);
   }, []);
 
   return {
@@ -394,5 +399,6 @@ export function useMarkdownState(initialValue?: string) {
     handleClear,
     handleReset,
     lastSaved,
+    isDirty,
   };
 }

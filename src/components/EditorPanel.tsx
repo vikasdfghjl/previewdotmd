@@ -3,6 +3,7 @@ import { ActionButton } from './ActionButton';
 import { PanelHeader } from './PanelHeader';
 import { FindReplace } from './FindReplace';
 import { SyntaxHighlightOverlay } from './SyntaxHighlightOverlay';
+import { FormattingToolbar } from './FormattingToolbar';
 import { useFindReplace } from '@/hooks/useFindReplace';
 import { useEditorShortcuts } from '@/hooks/useEditorShortcuts';
 import { useBracketMatching } from '@/hooks/useBracketMatching';
@@ -23,10 +24,24 @@ interface EditorPanelProps {
   onDownload?: () => void;
   onScroll?: (percentage: number) => void;
   zoomLevel?: number;
+  lastSaved?: Date | null;
+  isDirty?: boolean;
 }
 
 export interface EditorPanelRef {
   scrollToPercentage: (percentage: number) => void;
+}
+
+/** Returns a human-readable relative time string (e.g. "just now", "2 min ago"). */
+function formatRelativeTime(date: Date): string {
+  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (seconds < 10) return 'just now';
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
 export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<EditorPanelRef> }>(({
@@ -40,6 +55,8 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
   onDownload,
   onScroll,
   zoomLevel = 100,
+  lastSaved = null,
+  isDirty = false,
   ref,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -249,6 +266,12 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
           onPrev={goToPrevMatch}
         />
 
+        <FormattingToolbar
+          textareaRef={textareaRef}
+          markdown={markdown}
+          onChange={onChange}
+        />
+
         <div
           ref={lineNumbersRef}
           className="w-12 flex-shrink-0 overflow-hidden text-right pr-2 pt-4 pb-4 font-mono text-sm text-gray-500 dark:text-gray-400 select-none bg-gray-50/50 dark:bg-gray-800/30"
@@ -349,6 +372,23 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
           <span>{markdown.length} characters</span>
           <span>{markdown.split(/\s+/).filter(Boolean).length} words</span>
           <span>{markdown.split('\n').length} lines</span>
+          {/* Auto-save status indicator */}
+          <span className="flex items-center gap-1.5" aria-live="polite">
+            <span className="w-px h-3 bg-gray-300 dark:bg-gray-600" aria-hidden="true" />
+            {isDirty ? (
+              <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                Unsaved
+              </span>
+            ) : lastSaved ? (
+              <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                Saved {formatRelativeTime(lastSaved)}
+              </span>
+            ) : (
+              <span className="text-gray-400 dark:text-gray-500">—</span>
+            )}
+          </span>
         </div>
         <div className="text-xs text-secondary opacity-60">Tab size: 2 spaces</div>
       </div>

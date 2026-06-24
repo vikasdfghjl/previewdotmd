@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://previewdotmd.pages.dev/sitemap.xml

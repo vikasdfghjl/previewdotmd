@@ -1,0 +1,84 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
+const DISMISSED_KEY = 'pwa-install-dismissed';
+
+/**
+ * useInstallPrompt — captures the beforeinstallprompt event so the app
+ * can show a custom install button instead of relying on the browser's
+ * one-time native prompt.
+ *
+ * Respects a localStorage flag so users who dismiss won't be nagged again
+ * until the next session (or until they clear site data).
+ */
+export function useInstallPrompt() {
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Check if user previously dismissed
+    try {
+      if (localStorage.getItem(DISMISSED_KEY) === '1') {
+        setIsDismissed(true);
+      }
+    } catch {
+      // localStorage unavailable
+    }
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener(
+      'beforeinstallprompt',
+      handleBeforeInstallPrompt,
+    );
+
+    // If the app was installed, clear the prompt
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+    };
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const promptInstall = useCallback(async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+    }
+  }, [deferredPrompt]);
+
+  const dismissInstall = useCallback(() => {
+    setIsDismissed(true);
+    try {
+      localStorage.setItem(DISMISSED_KEY, '1');
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  /** True when we should show an install button. */
+  const showInstall = deferredPrompt !== null && !isDismissed;
+
+  return { showInstall, promptInstall, dismissInstall };
+}

@@ -87,6 +87,24 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Preview.md" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'Preview.md',
+              url: 'https://previewdotmd.pages.dev',
+              description:
+                'A professional markdown preview editor with live editing, dark mode, and side-by-side view. Install as a PWA. Works offline.',
+              applicationCategory: 'DeveloperApplication',
+              operatingSystem: 'Any',
+              offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+              browserRequirements: 'requires JavaScript',
+              permissions: 'clipboardWrite',
+            }),
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">
         <a
