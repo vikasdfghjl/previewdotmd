@@ -10,11 +10,9 @@ import { remarkPlugins, rehypePlugins } from '@/lib/markdownPlugins';
 import { scrollToPercentage, getScrollPercentage } from '@/lib/scroll';
 import { useHeadings } from '@/hooks/useHeadings';
 import { TableOfContents } from './TableOfContents';
+import { MathStyles } from './MathStyles';
 import { Icons } from '@/constants/icons';
 import { useTheme } from '@/contexts/ThemeContext';
-
-// Import KaTeX CSS for math rendering
-import 'katex/dist/katex.min.css';
 
 interface PreviewPanelProps {
   markdown: string;
@@ -191,6 +189,8 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
       </div>
       <TableOfContents headings={headings} scrollContainerRef={scrollContainerRef} />
     </div>
+
+      <MathStyles markdown={markdown} />
 
       {/* Footer with preview info */}
       <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-between">

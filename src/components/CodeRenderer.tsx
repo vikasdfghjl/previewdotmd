@@ -1,22 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState, useEffect, useRef } from 'react';
 import { MermaidRenderer } from './MermaidRenderer';
 
-const SyntaxHighlighterWrapper = dynamic(
-  () => import('./SyntaxHighlighterWrapper').then(mod => ({ default: mod.SyntaxHighlighterWrapper })),
-  {
-    ssr: false,
-    loading: () => <div className="p-5 text-sm text-secondary font-mono">Loading syntax highlighter...</div>,
+type SyntaxHighlighterComponent = React.ComponentType<{
+  language: string;
+  children: string;
+  isDark: boolean;
+}>;
+
+// Cache the module across all CodeRenderer instances — only loaded once
+let highlighterPromise: Promise<SyntaxHighlighterComponent> | null = null;
+let HighlighterModule: SyntaxHighlighterComponent | null = null;
+
+function loadHighlighter(): Promise<SyntaxHighlighterComponent> {
+  if (HighlighterModule) return Promise.resolve(HighlighterModule);
+  if (!highlighterPromise) {
+    highlighterPromise = import('./SyntaxHighlighterWrapper').then(
+      (mod) => {
+        HighlighterModule = mod.SyntaxHighlighterWrapper;
+        return HighlighterModule;
+      },
+    );
   }
-);
+  return highlighterPromise;
+}
 
 type CodeRendererProps = React.ComponentPropsWithoutRef<'code'> & {
   inline?: boolean;
   isDark?: boolean;
 };
 
+/**
+ * CodeRenderer — renders inline code and fenced code blocks.
+ *
+ * The syntax highlighter (~200 KB) is only loaded when a fenced code block
+ * with a recognized language is actually rendered. If the markdown has no
+ * code blocks (or only plain ``` fences), the highlighter is never fetched.
+ */
 export const CodeRenderer = React.memo<CodeRendererProps>(({
   className = '',
   children,
@@ -25,6 +46,9 @@ export const CodeRenderer = React.memo<CodeRendererProps>(({
   ...props
 }) => {
   const [copied, setCopied] = useState(false);
+  const [Highlighter, setHighlighter] = useState<SyntaxHighlighterComponent | null>(null);
+  const [highlighterLoading, setHighlighterLoading] = useState(false);
+  const mountedRef = useRef(true);
 
   const match = /language-(\w+)/.exec(className || '');
   const language = match ? match[1] : '';
@@ -33,6 +57,19 @@ export const CodeRenderer = React.memo<CodeRendererProps>(({
   if (!inline && language === 'mermaid') {
     return <MermaidRenderer chart={String(children).replace(/\n$/, '')} />;
   }
+
+  // Trigger lazy load of the syntax highlighter only when a language is detected
+  useEffect(() => {
+    if (!inline && match && !Highlighter && !highlighterLoading) {
+      setHighlighterLoading(true);
+      loadHighlighter().then((mod) => {
+        if (mountedRef.current) {
+          setHighlighter(mod);
+        }
+      });
+    }
+    return () => { mountedRef.current = false; };
+  }, [inline, !!match, Highlighter, highlighterLoading]);
 
   // Copy to clipboard function
   const handleCopy = async () => {
@@ -46,6 +83,10 @@ export const CodeRenderer = React.memo<CodeRendererProps>(({
   };
 
   if (!inline && match) {
+    // Fallback while highlighter is loading (or if it failed to load)
+    const CodeBlock = Highlighter;
+    const rawCode = String(children).replace(/\n$/, '');
+
     return (
       <div className="relative group my-4 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         {/* Code block header */}
@@ -60,7 +101,7 @@ export const CodeRenderer = React.memo<CodeRendererProps>(({
               {language}
             </span>
           </div>
-          
+
           {/* Copy button */}
           <button
             onClick={handleCopy}
@@ -87,15 +128,18 @@ export const CodeRenderer = React.memo<CodeRendererProps>(({
             )}
           </button>
         </div>
-        
-        {/* Lazy-loaded code content */}
+
+        {/* Code content */}
         <div className="relative">
-          <SyntaxHighlighterWrapper
-            language={match[1]}
-            isDark={isDark}
-          >
-            {String(children).replace(/\n$/, '')}
-          </SyntaxHighlighterWrapper>
+          {CodeBlock ? (
+            <CodeBlock language={language} isDark={isDark}>
+              {rawCode}
+            </CodeBlock>
+          ) : (
+            <pre className="m-0 p-5 text-sm font-mono bg-gray-50 dark:bg-gray-900 overflow-x-auto">
+              <code>{rawCode}</code>
+            </pre>
+          )}
 
           {/* Fade effect at bottom */}
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-black/5 to-transparent dark:from-black/20 pointer-events-none" />
@@ -103,7 +147,7 @@ export const CodeRenderer = React.memo<CodeRendererProps>(({
       </div>
     );
   }
-  
+
   // Inline code styling
   return (
     <code
