@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Turbopack is enabled by default in Next.js 16
+  // Static export for Cloudflare Workers/Pages deployment
+  output: "export",
 };
 
 export default nextConfig;
