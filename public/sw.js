@@ -1,13 +1,13 @@
-const STATIC_CACHE = 'previewmd-static-v1';
-const DYNAMIC_CACHE = 'previewmd-dynamic-v1';
+const CACHE_VERSION = 'v2';
+const STATIC_CACHE = `previewmd-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE = `previewmd-dynamic-${CACHE_VERSION}`;
 
-// Assets to cache on install
+// Assets to cache on install (Cloudflare Pages routes, no .html suffixes)
 const STATIC_ASSETS = [
   '/',
-  '/index.html',
   '/manifest.json',
   '/favicon.ico',
-  // Icons will be cached as they're requested
+  // Icons cached on first access via runtime caching
 ];
 
 // Install event - cache static assets

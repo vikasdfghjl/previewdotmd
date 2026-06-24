@@ -26,6 +26,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase:
+    process.env.CF_PAGES_URL
+      ? new URL(process.env.CF_PAGES_URL)
+      : process.env.NEXT_PUBLIC_SITE_URL
+        ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+        : new URL("https://previewdotmd.pages.dev"),
   title: "Preview.md - Markdown Preview Editor",
   description: "A professional markdown preview editor with live editing, dark mode, and side-by-side view",
   manifest: "/manifest.json",
@@ -42,6 +48,26 @@ export const metadata: Metadata = {
     apple: [
       { url: "/icon-192x192.png", sizes: "192x192" },
     ],
+  },
+  openGraph: {
+    title: "Preview.md — Markdown Preview Editor",
+    description: "Write markdown with live preview. Install as a PWA. Works offline. Export to HTML, PDF, and plain text.",
+    type: "website",
+    siteName: "Preview.md",
+    images: [
+      {
+        url: "/icon-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "Preview.md logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "Preview.md — Markdown Preview Editor",
+    description: "Write markdown with live preview. Install as a PWA. Works offline. Export to HTML, PDF, and plain text.",
+    images: ["/icon-512x512.png"],
   },
 };
 

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo, useCallback, forwardRef, useImperativeHandle, useDeferredValue } from 'react';
+import React, { useRef, useState, useEffect, useMemo, useCallback, useImperativeHandle, useDeferredValue } from 'react';
 import { ActionButton } from './ActionButton';
 import { PanelHeader } from './PanelHeader';
 import { FindReplace } from './FindReplace';
@@ -28,7 +28,7 @@ export interface EditorPanelRef {
   scrollToPercentage: (percentage: number) => void;
 }
 
-export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
+export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<EditorPanelRef> }>(({
   markdown,
   onChange,
   onClear,
@@ -39,7 +39,8 @@ export const EditorPanel = forwardRef<EditorPanelRef, EditorPanelProps>(({
   onDownload,
   onScroll,
   zoomLevel = 100,
-}, ref) => {
+  ref,
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);

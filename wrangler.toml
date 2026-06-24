@@ -1,0 +1,18 @@
+# Cloudflare Pages deployment configuration
+# Preview.md is deployed via Cloudflare Pages auto-detection (no adapter needed)
+# See: https://developers.cloudflare.com/pages/framework-guides/nextjs/
+
+name = "previewdotmd"
+compatibility_date = "2025-06-01"
+
+# Pages-specific config
+[pages]
+# Next.js auto-detection handles the build output directory automatically
+compatibility_flags = ["nodejs_compat"]
+
+# Build configuration for Cloudflare Pages
+[build]
+command = "npm run build"
+
+# The service worker handles offline and PWA features
+# Static assets have immutable cache headers via _headers file

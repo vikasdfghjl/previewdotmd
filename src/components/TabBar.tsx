@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useLayout, ActiveTab } from '@/contexts/LayoutContext';
+import { useLayoutState, useLayoutActions, ActiveTab } from '@/contexts/LayoutContext';
 import { Icons } from '@/constants/icons';
 
 interface TabItem {
@@ -16,7 +16,8 @@ const tabs: TabItem[] = [
 ];
 
 export const TabBar: React.FC = () => {
-  const { activeTab, setActiveTab } = useLayout();
+  const { activeTab } = useLayoutState();
+  const { setActiveTab } = useLayoutActions();
 
   return (
     <div className="flex border-b bg-gray-50 dark:bg-gray-800/50">

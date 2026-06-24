@@ -47,8 +47,26 @@
 }
 
 @theme inline {
+  /* Surfaces */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-panel: var(--panel-bg);
+  --color-panel-border: var(--panel-border);
+  --color-header: var(--header-bg);
+  --color-header-border: var(--header-border);
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  /* Accent */
+  --color-accent: var(--accent-color);
+  --color-accent-hover: var(--accent-hover);
+  /* Buttons */
+  --color-button: var(--button-bg);
+  --color-button-hover: var(--button-hover);
+  --color-button-active: var(--button-active);
+  /* Code */
+  --color-code: var(--code-bg);
+  /* Typography */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -466,12 +484,9 @@ textarea::placeholder {
   color: #dcdcaa;
 }
 
-/* Transition for theme switching */
-* {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
+/* Theme transitions are applied to specific elements only
+   (body, .panel, .btn, .prose, textarea, etc.)
+   to avoid costly style recalculation on every DOM node. */
 
 /* ============================================
    Extended Markdown Support Styles

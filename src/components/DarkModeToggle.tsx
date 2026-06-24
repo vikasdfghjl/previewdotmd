@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useSyncExternalStore } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 
 // Detect hydration: returns false during SSR/first render, true after mount
 function useIsMounted() {
-  return useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
+  const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setMounted(true); }, []);
+  return mounted;
 }
 
 export const DarkModeToggle: React.FC = () => {

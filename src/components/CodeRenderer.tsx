@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useTheme } from '@/contexts/ThemeContext';
 import { MermaidRenderer } from './MermaidRenderer';
 
 const SyntaxHighlighterWrapper = dynamic(
@@ -15,16 +14,16 @@ const SyntaxHighlighterWrapper = dynamic(
 
 type CodeRendererProps = React.ComponentPropsWithoutRef<'code'> & {
   inline?: boolean;
+  isDark?: boolean;
 };
 
-export const CodeRenderer: React.FC<CodeRendererProps> = ({
+export const CodeRenderer = React.memo<CodeRendererProps>(({
   className = '',
   children,
   inline = false,
+  isDark = false,
   ...props
 }) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
   const [copied, setCopied] = useState(false);
 
   const match = /language-(\w+)/.exec(className || '');
@@ -114,4 +113,6 @@ export const CodeRenderer: React.FC<CodeRendererProps> = ({
       {children}
     </code>
   );
-};
+});
+
+CodeRenderer.displayName = 'CodeRenderer';
