@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Command } from '@/hooks/useCommandPalette';
 
 interface CommandPaletteProps {
@@ -32,6 +32,22 @@ export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
   onSelectNext,
   onSelectPrev,
 }) => {
+  // Pre-compute command ID → index map for O(1) lookups (was O(N²) with findIndex)
+  const commandIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    commands.forEach((cmd, i) => map.set(cmd.id, i));
+    return map;
+  }, [commands]);
+
+  // Group commands by category (computed unconditionally even when closed,
+  // but cheap enough when commands is empty/common case)
+  const groupedCommands = commands.reduce((acc, cmd) => {
+    const category = cmd.category || 'Other';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(cmd);
+    return acc;
+  }, {} as Record<string, Command[]>);
+
   if (!isOpen) return null;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -54,14 +70,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
         break;
     }
   };
-
-  // Group commands by category
-  const groupedCommands = commands.reduce((acc, cmd) => {
-    const category = cmd.category || 'Other';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(cmd);
-    return acc;
-  }, {} as Record<string, Command[]>);
 
   const categories = Object.keys(groupedCommands);
 
@@ -141,8 +149,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
                     {category}
                   </div>
                   {groupedCommands[category].map((cmd) => {
-                    // Find the actual index in the full commands array
-                    const actualIndex = commands.findIndex(c => c.id === cmd.id);
+                    // O(1) index lookup instead of O(N) findIndex
+                    const actualIndex = commandIndexMap.get(cmd.id) ?? -1;
                     const isSelected = actualIndex === selectedIndex;
 
                     return (

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useLayout, LayoutMode } from '@/contexts/LayoutContext';
+import { useLayoutState, useLayoutActions, LayoutMode } from '@/contexts/LayoutContext';
 import { ToolbarButton } from './ToolbarButton';
 import { Icons } from '@/constants/icons';
 
@@ -17,12 +17,14 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '' }
     fullscreen,
     readingMode,
     zoomLevel,
+  } = useLayoutState();
+  const {
     setLayoutMode,
     toggleSyncScroll,
     toggleFullscreen,
     toggleReadingMode,
     setZoomLevel,
-  } = useLayout();
+  } = useLayoutActions();
 
   const layoutModes: { mode: LayoutMode; label: string; icon: React.ReactNode }[] = [
     { mode: 'split', label: 'Split View', icon: Icons.split },

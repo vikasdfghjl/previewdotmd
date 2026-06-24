@@ -13,7 +13,6 @@ interface LayoutState {
   readingMode: boolean;
   zoomLevel: number;
   activeTab: ActiveTab;
-  editorWidth: number; // percentage for split mode (10-90)
 }
 
 interface LayoutActions {
@@ -27,9 +26,18 @@ interface LayoutActions {
   resetLayout: () => void;
 }
 
-type LayoutContextType = LayoutState & LayoutActions;
+type LayoutContextType = LayoutState & { editorWidth: number } & LayoutActions;
 
-// Open/Closed: Default values are easily extensible
+// Split into three contexts:
+// - LayoutState: slow-changing values (layout mode, toggles, tab, zoom)
+// - EditorWidth: fast-changing during resize drag
+// - LayoutActions: stable function references
+// This prevents components that don't use editorWidth from re-rendering
+// during resize (LayoutControls, TabBar, Header, etc.)
+const LayoutStateContext = createContext<LayoutState | undefined>(undefined);
+const EditorWidthContext = createContext<number | undefined>(undefined);
+const LayoutActionsContext = createContext<LayoutActions | undefined>(undefined);
+
 const DEFAULT_STATE: LayoutState = {
   layoutMode: 'split',
   syncScroll: false,
@@ -37,13 +45,15 @@ const DEFAULT_STATE: LayoutState = {
   readingMode: false,
   zoomLevel: 100,
   activeTab: 'editor',
-  editorWidth: 50,
 };
 
-const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
+const DEFAULT_EDITOR_WIDTH = 50;
 
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
+  // Slow-changing layout state (mode, toggles, tabs, zoom)
   const [state, setState] = useState<LayoutState>(DEFAULT_STATE);
+  // Fast-changing editor width (updated per-frame during resize drag)
+  const [editorWidth, setEditorWidthState] = useState<number>(DEFAULT_EDITOR_WIDTH);
 
   const setLayoutMode = useCallback((mode: LayoutMode) => {
     setState(prev => ({ ...prev, layoutMode: mode }));
@@ -72,16 +82,16 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
 
   const setEditorWidth = useCallback((width: number) => {
     const clamped = Math.max(10, Math.min(90, width));
-    setState(prev => ({ ...prev, editorWidth: clamped }));
+    setEditorWidthState(clamped);
   }, []);
 
   const resetLayout = useCallback(() => {
     setState(DEFAULT_STATE);
+    setEditorWidthState(DEFAULT_EDITOR_WIDTH);
   }, []);
 
-  // Dependency Inversion: Memoize context value to prevent unnecessary re-renders
-  const value = useMemo<LayoutContextType>(() => ({
-    ...state,
+  // Memoize actions — stable reference, never changes
+  const actions = useMemo<LayoutActions>(() => ({
     setLayoutMode,
     toggleSyncScroll,
     toggleFullscreen,
@@ -91,7 +101,6 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     setEditorWidth,
     resetLayout,
   }), [
-    state,
     setLayoutMode,
     toggleSyncScroll,
     toggleFullscreen,
@@ -103,16 +112,59 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   return (
-    <LayoutContext.Provider value={value}>
-      {children}
-    </LayoutContext.Provider>
+    <LayoutStateContext.Provider value={state}>
+      <EditorWidthContext.Provider value={editorWidth}>
+        <LayoutActionsContext.Provider value={actions}>
+          {children}
+        </LayoutActionsContext.Provider>
+      </EditorWidthContext.Provider>
+    </LayoutStateContext.Provider>
   );
 }
 
+/**
+ * useLayout — combined hook that reads all three contexts.
+ * Returns a merged object like the previous single-context API.
+ */
 export function useLayout(): LayoutContextType {
-  const context = useContext(LayoutContext);
-  if (context === undefined) {
+  const state = useContext(LayoutStateContext);
+  const editorWidth = useContext(EditorWidthContext);
+  const actions = useContext(LayoutActionsContext);
+
+  if (state === undefined || editorWidth === undefined || actions === undefined) {
     throw new Error('useLayout must be used within a LayoutProvider');
   }
-  return context;
+
+  return useMemo(() => ({
+    ...state,
+    editorWidth,
+    ...actions,
+  }), [state, editorWidth, actions]);
+}
+
+/**
+ * Selective hooks — use these when a component only needs a subset.
+ * Components subscribing only to LayoutStateContext will NOT re-render
+ * when editorWidth changes during resize drag.
+ */
+
+/** Slow-changing layout state + zoom */
+export function useLayoutState(): LayoutState {
+  const ctx = useContext(LayoutStateContext);
+  if (ctx === undefined) throw new Error('useLayoutState must be used within a LayoutProvider');
+  return ctx;
+}
+
+/** Editor width only (fast-changing during resize) */
+export function useEditorWidth(): number {
+  const ctx = useContext(EditorWidthContext);
+  if (ctx === undefined) throw new Error('useEditorWidth must be used within a LayoutProvider');
+  return ctx;
+}
+
+/** Stable action callbacks */
+export function useLayoutActions(): LayoutActions {
+  const ctx = useContext(LayoutActionsContext);
+  if (ctx === undefined) throw new Error('useLayoutActions must be used within a LayoutProvider');
+  return ctx;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useRef, useMemo, useImperativeHandle } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { CodeRenderer } from './CodeRenderer';
 import { PanelHeader } from './PanelHeader';
@@ -8,6 +8,7 @@ import { AnchorHeading } from './AnchorHeading';
 import { ImageLightbox, ClickableImage } from './ImageLightbox';
 import { remarkPlugins, rehypePlugins } from '@/lib/markdownPlugins';
 import { Icons } from '@/constants/icons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // Import KaTeX CSS for math rendering
 import 'katex/dist/katex.min.css';
@@ -28,7 +29,7 @@ export interface PreviewPanelRef {
   scrollToPercentage: (percentage: number) => void;
 }
 
-export const PreviewPanel = React.memo(forwardRef<PreviewPanelRef, PreviewPanelProps>(({
+export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<PreviewPanelRef> }>(({
   markdown,
   isVisible,
   onToggle,
@@ -38,7 +39,10 @@ export const PreviewPanel = React.memo(forwardRef<PreviewPanelRef, PreviewPanelP
   zoomLevel = 100,
   onScroll,
   syncScrollActive = false,
-}, ref) => {
+  ref,
+}) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [showExportMenu, setShowExportMenu] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
@@ -55,6 +59,31 @@ export const PreviewPanel = React.memo(forwardRef<PreviewPanelRef, PreviewPanelP
       });
     },
   }));
+
+  // Memoize markdown components — avoids recreating object references on every render
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const markdownComponents = useMemo(() => ({
+    code: ({ inline, className, children, ...props }: any) => (
+      <CodeRenderer inline={!!inline} className={typeof className === 'string' ? className : ''} isDark={isDark} {...props}>
+        {String(children ?? '')}
+      </CodeRenderer>
+    ),
+    h1: ({ children, ...props }: any) => <AnchorHeading level={1} {...props}>{children}</AnchorHeading>,
+    h2: ({ children, ...props }: any) => <AnchorHeading level={2} {...props}>{children}</AnchorHeading>,
+    h3: ({ children, ...props }: any) => <AnchorHeading level={3} {...props}>{children}</AnchorHeading>,
+    h4: ({ children, ...props }: any) => <AnchorHeading level={4} {...props}>{children}</AnchorHeading>,
+    h5: ({ children, ...props }: any) => <AnchorHeading level={5} {...props}>{children}</AnchorHeading>,
+    h6: ({ children, ...props }: any) => <AnchorHeading level={6} {...props}>{children}</AnchorHeading>,
+    img: ({ src, alt, ...props }: any) => (
+      <ClickableImage
+        src={typeof src === 'string' ? src : ''}
+        alt={typeof alt === 'string' ? alt : ''}
+        className="rounded-lg shadow-md"
+        {...props}
+      />
+    ),
+  }), [isDark]);
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   const handleScroll = () => {
     if (!scrollContainerRef.current || isScrollingRef.current) return;
@@ -171,23 +200,7 @@ export const PreviewPanel = React.memo(forwardRef<PreviewPanelRef, PreviewPanelP
                 <ReactMarkdown
                   remarkPlugins={remarkPlugins}
                   rehypePlugins={rehypePlugins}
-                  components={{
-                    code: CodeRenderer,
-                    h1: ({ children, ...props }) => <AnchorHeading level={1} {...props}>{children}</AnchorHeading>,
-                    h2: ({ children, ...props }) => <AnchorHeading level={2} {...props}>{children}</AnchorHeading>,
-                    h3: ({ children, ...props }) => <AnchorHeading level={3} {...props}>{children}</AnchorHeading>,
-                    h4: ({ children, ...props }) => <AnchorHeading level={4} {...props}>{children}</AnchorHeading>,
-                    h5: ({ children, ...props }) => <AnchorHeading level={5} {...props}>{children}</AnchorHeading>,
-                    h6: ({ children, ...props }) => <AnchorHeading level={6} {...props}>{children}</AnchorHeading>,
-                    img: ({ src, alt, ...props }) => (
-                      <ClickableImage 
-                        src={typeof src === 'string' ? src : ''} 
-                        alt={typeof alt === 'string' ? alt : ''} 
-                        className="rounded-lg shadow-md"
-                        {...props}
-                      />
-                    ),
-                  }}
+                  components={markdownComponents}
                 >
                   {markdown}
                 </ReactMarkdown>
@@ -215,6 +228,6 @@ export const PreviewPanel = React.memo(forwardRef<PreviewPanelRef, PreviewPanelP
       </div>
     </div>
   );
-}));
+});
 
 PreviewPanel.displayName = 'PreviewPanel';
