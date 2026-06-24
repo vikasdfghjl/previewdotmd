@@ -64,18 +64,16 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="hidden lg:flex flex-shrink-0 w-6 items-center justify-center bg-gray-100 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-400 hover:text-blue-500 transition-colors group"
+          className="hidden lg:flex flex-shrink-0 w-7 items-center justify-center bg-gray-100 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group"
           title="Show table of contents"
           aria-label="Show table of contents"
         >
-          <svg
-            className="w-3.5 h-3.5 transition-transform group-hover:scale-110"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+          <span
+            className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gray-400 group-hover:text-blue-500 transition-colors whitespace-nowrap"
+            style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
+            Table of Contents
+          </span>
         </button>
       )}
 
