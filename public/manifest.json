@@ -3,7 +3,9 @@
   "short_name": "Preview.md",
   "description": "A powerful markdown editor with live preview, syntax highlighting, and extended markdown support",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",
   "orientation": "any",
@@ -58,22 +60,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Markdown Editor with Live Preview"
-    },
-    {
-      "src": "/screenshot-narrow.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Mobile Markdown Editor"
     }
   ],
   "shortcuts": [
