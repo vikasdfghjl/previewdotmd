@@ -61,7 +61,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   if (headings.length === 0) return null;
 
   return (
-    <div className="hidden xl:block w-52 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/20 overflow-y-auto">
+    <div className="hidden lg:block w-48 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/20 overflow-y-auto">
       <div className="sticky top-0 px-3 py-3">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">

@@ -4,6 +4,8 @@ import { PanelHeader } from './PanelHeader';
 import { FindReplace } from './FindReplace';
 import { SyntaxHighlightOverlay } from './SyntaxHighlightOverlay';
 import { FormattingToolbar } from './FormattingToolbar';
+import { ConfirmDialog } from './ConfirmDialog';
+import { StorageNotice } from './StorageNotice';
 import { useFindReplace } from '@/hooks/useFindReplace';
 import { useEditorShortcuts } from '@/hooks/useEditorShortcuts';
 import { useBracketMatching } from '@/hooks/useBracketMatching';
@@ -26,6 +28,7 @@ interface EditorPanelProps {
   zoomLevel?: number;
   lastSaved?: Date | null;
   isDirty?: boolean;
+  storageWarning?: boolean;
 }
 
 export interface EditorPanelRef {
@@ -57,12 +60,14 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
   zoomLevel = 100,
   lastSaved = null,
   isDirty = false,
+  storageWarning = false,
   ref,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const isScrollingRef = useRef(false);
 
   // Defer syntax highlighting to avoid blocking textarea input
@@ -227,11 +232,11 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
           <div className="flex items-center gap-1.5">{Icons.download}<span>Download</span></div>
         </ActionButton>
       )}
-      <ActionButton onClick={onClear} title="Clear all markdown" variant="danger">
-        <div className="flex items-center gap-1.5">{Icons.trash}<span>Clear</span></div>
+      <ActionButton onClick={() => setShowClearConfirm(true)} title="Clear all markdown content" variant="danger">
+        <div className="flex items-center gap-1.5">{Icons.trash}<span>Clear All</span></div>
       </ActionButton>
-      <ActionButton onClick={onReset} title="Reset to default example">
-        <div className="flex items-center gap-1.5">{Icons.reset}<span>Reset</span></div>
+      <ActionButton onClick={onReset} title="Load the demo example document">
+        <div className="flex items-center gap-1.5">{Icons.reset}<span>Load Example</span></div>
       </ActionButton>
     </>
   );
@@ -368,7 +373,7 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
       </div>
 
       <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-between">
-        <div id="editor-stats" className="flex items-center gap-4 text-xs text-secondary" aria-label="Editor statistics">
+        <div id="editor-stats" className="flex items-center gap-4 text-xs text-secondary flex-wrap" aria-label="Editor statistics">
           <span>{markdown.length} characters</span>
           <span>{markdown.split(/\s+/).filter(Boolean).length} words</span>
           <span>{markdown.split('\n').length} lines</span>
@@ -389,9 +394,30 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
               <span className="text-gray-400 dark:text-gray-500">—</span>
             )}
           </span>
+          {storageWarning && (
+            <span className="text-red-600 dark:text-red-400 flex items-center gap-1" title="Browser storage is full or unavailable. Your content won't be saved.">
+              ⚠️ Storage full
+            </span>
+          )}
         </div>
+        {/* One-time notice about local-only storage */}
+        <StorageNotice />
         <div className="text-xs text-secondary opacity-60">Tab size: 2 spaces</div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showClearConfirm}
+        title="Clear all content?"
+        message="This will permanently clear the editor. Your content is auto-saved to this browser and can be recovered by reloading the page if you haven't typed since the last save."
+        confirmLabel="Clear All"
+        cancelLabel="Keep Content"
+        variant="danger"
+        onConfirm={() => {
+          onClear();
+          setShowClearConfirm(false);
+        }}
+        onCancel={() => setShowClearConfirm(false)}
+      />
     </div>
   );
 });

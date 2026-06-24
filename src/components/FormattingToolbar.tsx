@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
+import { ToolbarButton } from './ToolbarButton';
 
 interface FormattingToolbarProps {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
@@ -21,7 +22,10 @@ interface ToolbarAction {
   };
 }
 
-/** Inserts/replaces text at the selection and positions the cursor. */
+/**
+ * Applies a formatting action using native textarea mutations so the browser's
+ * undo stack records the change (Ctrl+Z works correctly).
+ */
 function applyAction(
   textarea: HTMLTextAreaElement,
   markdown: string,
@@ -38,16 +42,23 @@ function applyAction(
     end,
   });
 
-  const newValue = markdown.slice(0, start) + replacement + markdown.slice(end);
-  onChange(newValue);
+  // Use native setRangeText so the browser's undo history records the mutation.
+  // Important: save the old value first so we can compute cursor position.
+  const oldValue = textarea.value;
 
-  // Restore focus and cursor position after React re-render
-  requestAnimationFrame(() => {
-    textarea.focus();
-    const selStart = newCursorStart ?? start + replacement.length;
-    const selEnd = newCursorEnd ?? start + replacement.length;
-    textarea.setSelectionRange(selStart, selEnd);
-  });
+  textarea.focus();
+  textarea.setRangeText(replacement, start, end, 'select');
+  // Move cursor to the desired position
+  const cursorStart = newCursorStart ?? start + replacement.length;
+  const cursorEnd = newCursorEnd ?? start + replacement.length;
+  textarea.setSelectionRange(cursorStart, cursorEnd);
+
+  // If setRangeText actually changed the value, sync React state.
+  // setRangeText dispatches a native 'input' event in most browsers,
+  // but we also fire one explicitly for compatibility.
+  if (textarea.value !== oldValue) {
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+  }
 }
 
 /** SVG path for the bold icon */
@@ -241,15 +252,14 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
       aria-label="Markdown formatting"
     >
       {TOOLBAR_ACTIONS.map((item) => (
-        <button
+        <ToolbarButton
           key={item.label}
+          size="sm"
           onClick={() => handleAction(item.action)}
-          className="p-1.5 min-w-[32px] min-h-[32px] rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors flex items-center justify-center"
           title={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
-          aria-label={item.title}
         >
           {item.icon}
-        </button>
+        </ToolbarButton>
       ))}
     </div>
   );

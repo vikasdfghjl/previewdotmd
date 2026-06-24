@@ -323,12 +323,14 @@ function loadFromStorage(): string | null {
   }
 }
 
-function saveToStorage(content: string): void {
-  if (typeof window === 'undefined') return;
+function saveToStorage(content: string): boolean {
+  if (typeof window === 'undefined') return true;
   try {
     localStorage.setItem(STORAGE_KEY, content);
+    return true;
   } catch {
-    // Storage full or unavailable
+    // Storage full or unavailable — return false so the UI can warn the user
+    return false;
   }
 }
 
@@ -342,6 +344,7 @@ export function useMarkdownState(initialValue?: string) {
   const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [storageWarning, setStorageWarning] = useState(false);
 
   // Debounce preview rendering to reduce re-renders on fast typing
   useEffect(() => {
@@ -365,7 +368,12 @@ export function useMarkdownState(initialValue?: string) {
       clearTimeout(saveTimeoutRef.current);
     }
     saveTimeoutRef.current = setTimeout(() => {
-      saveToStorage(markdown);
+      const ok = saveToStorage(markdown);
+      if (!ok) {
+        setStorageWarning(true);
+      } else {
+        setStorageWarning(false);
+      }
       setLastSaved(new Date());
       setIsDirty(false);
     }, AUTOSAVE_DELAY);
@@ -400,5 +408,6 @@ export function useMarkdownState(initialValue?: string) {
     handleReset,
     lastSaved,
     isDirty,
+    storageWarning,
   };
 }

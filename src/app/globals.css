@@ -484,6 +484,18 @@ textarea::placeholder {
   color: #dcdcaa;
 }
 
+/* Accessibility: honour the user's OS-level motion preference.
+   Disables all animations and transitions when set. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 /* Theme transitions are applied to specific elements only
    (body, .panel, .btn, .prose, textarea, etc.)
    to avoid costly style recalculation on every DOM node. */

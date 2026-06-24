@@ -17,7 +17,7 @@ import { Icons } from '@/constants/icons';
 import { createCommands } from '@/constants/commands';
 
 const MarkdownPreview: React.FC = () => {
-  const { markdown, previewMarkdown, handleChange, handleClear, handleReset, lastSaved, isDirty } = useMarkdownState();
+  const { markdown, previewMarkdown, handleChange, handleClear, handleReset, lastSaved, isDirty, storageWarning } = useMarkdownState();
   const {
     layoutMode,
     syncScroll,
@@ -177,6 +177,7 @@ const MarkdownPreview: React.FC = () => {
                   zoomLevel={zoomLevel}
                   lastSaved={lastSaved}
                   isDirty={isDirty}
+                  storageWarning={storageWarning}
                 />
               </div>
             )}
@@ -214,6 +215,7 @@ const MarkdownPreview: React.FC = () => {
                   zoomLevel={zoomLevel}
                   lastSaved={lastSaved}
                   isDirty={isDirty}
+                  storageWarning={storageWarning}
                 />
               </div>
             )}
@@ -260,6 +262,7 @@ const MarkdownPreview: React.FC = () => {
                   zoomLevel={zoomLevel}
                   lastSaved={lastSaved}
                   isDirty={isDirty}
+                  storageWarning={storageWarning}
                 />
               </div>
             )}

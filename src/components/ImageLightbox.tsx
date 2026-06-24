@@ -123,6 +123,8 @@ export const ImageLightbox: React.FC<ImageLightboxProps> = ({ children }) => {
             <img
               src={currentImage.src}
               alt={currentImage.alt}
+              loading="lazy"
+              decoding="async"
               className={`
                 max-w-full max-h-[90vh]
                 object-contain
@@ -175,6 +177,8 @@ export const ClickableImage: React.FC<ClickableImageProps> = ({
     <img
       src={src}
       alt={alt}
+      loading="lazy"
+      decoding="async"
       className={`
         cursor-zoom-in
         transition-transform duration-200

@@ -51,6 +51,9 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
+        {/* Visual separator between app controls and external links */}
+        <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 hidden sm:block" aria-hidden="true" />
+
         <a
           href={githubUrl}
           target="_blank"

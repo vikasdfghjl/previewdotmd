@@ -163,8 +163,8 @@ export function createCommands(deps: {
     },
     {
       id: 'edit-reset',
-      label: 'Reset to Example',
-      description: 'Load example markdown',
+      label: 'Load Example Document',
+      description: 'Replace editor content with the demo example',
       icon: Icons.reset,
       action: handleReset,
       category: 'Edit',
