@@ -23,21 +23,46 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+const SITE_URL =
+  process.env.CF_PAGES_URL
+    ? new URL(process.env.CF_PAGES_URL)
+    : process.env.NEXT_PUBLIC_SITE_URL
+      ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+      : new URL("https://previewdotmd.pages.dev");
+
 export const metadata: Metadata = {
-  metadataBase:
-    process.env.CF_PAGES_URL
-      ? new URL(process.env.CF_PAGES_URL)
-      : process.env.NEXT_PUBLIC_SITE_URL
-        ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
-        : new URL("https://previewdotmd.pages.dev"),
-  title: "Preview.md - Markdown Preview Editor",
-  description: "A professional markdown preview editor with live editing, dark mode, and side-by-side view",
+  metadataBase: SITE_URL,
+
+  // Title: 58 chars — fits Google's ~60 char display limit with rich keyword coverage
+  title: "Preview.md — Free Online Markdown Editor with Live Preview",
+
+  // Description: 158 chars — near Google's ~160 char limit, keyword-rich
+  description:
+    "A free, offline-capable Markdown editor with live preview, syntax highlighting, dark mode, Mermaid diagrams, KaTeX math, and export to HTML/PDF. Install as a PWA.",
+
+  keywords: [
+    "markdown editor", "live preview", "markdown preview", "online markdown editor",
+    "free markdown editor", "PWA markdown editor", "offline markdown editor",
+    "markdown to HTML", "syntax highlighting", "dark mode markdown",
+    "mermaid diagrams", "katex math", "GFM markdown",
+  ],
+
+  // Let search engines index and follow links
+  robots: { index: true, follow: true },
+
+  // Canonical URL
+  alternates: {
+    canonical: SITE_URL.origin,
+  },
+
   manifest: "/manifest.json",
+
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Preview.md",
   },
+
   icons: {
     icon: [
       { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
@@ -47,25 +72,30 @@ export const metadata: Metadata = {
       { url: "/icon-192x192.png", sizes: "192x192" },
     ],
   },
+
   openGraph: {
-    title: "Preview.md — Markdown Preview Editor",
-    description: "Write markdown with live preview. Install as a PWA. Works offline. Export to HTML, PDF, and plain text.",
+    title: "Preview.md — Free Online Markdown Editor with Live Preview",
+    description:
+      "Write markdown with live preview. Install as a PWA. Works offline. Syntax highlighting, Mermaid diagrams, KaTeX math, export to HTML, PDF, and plain text.",
     type: "website",
     siteName: "Preview.md",
+    url: SITE_URL.origin,
     images: [
       {
-        url: "/icon-512x512.png",
-        width: 512,
-        height: 512,
-        alt: "Preview.md logo",
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "Preview.md — Markdown Editor with Live Preview",
       },
     ],
   },
+
   twitter: {
-    card: "summary",
-    title: "Preview.md — Markdown Preview Editor",
-    description: "Write markdown with live preview. Install as a PWA. Works offline. Export to HTML, PDF, and plain text.",
-    images: ["/icon-512x512.png"],
+    card: "summary_large_image",
+    title: "Preview.md — Free Online Markdown Editor",
+    description:
+      "Write markdown with live preview. Install as a PWA. Works offline. Syntax highlighting, Mermaid diagrams, KaTeX math, export to HTML/PDF.",
+    images: ["/og-image.svg"],
   },
 };
 
@@ -87,21 +117,43 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Preview.md" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="canonical" href="https://previewdotmd.pages.dev/" />
+        <link rel="alternate" hrefLang="en" href="https://previewdotmd.pages.dev/" />
+        <link rel="alternate" hrefLang="x-default" href="https://previewdotmd.pages.dev/" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               '@context': 'https://schema.org',
-              '@type': 'WebApplication',
+              '@type': 'SoftwareApplication',
               name: 'Preview.md',
               url: 'https://previewdotmd.pages.dev',
-              description:
-                'A professional markdown preview editor with live editing, dark mode, and side-by-side view. Install as a PWA. Works offline.',
               applicationCategory: 'DeveloperApplication',
               operatingSystem: 'Any',
-              offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+              description:
+                'A free, offline-capable Markdown editor with live preview, syntax highlighting for 100+ languages, Mermaid diagrams, KaTeX math rendering, dark mode, PWA install, and export to HTML/PDF/plain text.',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'USD',
+              },
+              featureList: [
+                'Live preview with real-time rendering',
+                'Syntax highlighting for 100+ languages',
+                'Mermaid diagram support (flowcharts, sequence, Gantt)',
+                'KaTeX math rendering (inline and block)',
+                'Dark mode with system preference detection',
+                'PWA install with offline support',
+                'Export to HTML, PDF, and plain text',
+                'Split, stacked, and tabbed layout modes',
+                'Command palette (Ctrl+Shift+P)',
+                'Find and replace with regex support',
+                'Auto-save to browser localStorage',
+                'GitHub Flavored Markdown (GFM)',
+              ],
               browserRequirements: 'requires JavaScript',
               permissions: 'clipboardWrite',
+              sameAs: ['https://github.com/vikasdfghjl/previewdotmd'],
             }),
           }}
         />

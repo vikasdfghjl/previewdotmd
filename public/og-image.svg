@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.12"/>
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.04"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" rx="0"/>
+
+  <!-- Subtle pattern -->
+  <circle cx="1000" cy="100" r="300" fill="#ffffff" opacity="0.03"/>
+  <circle cx="200" cy="500" r="250" fill="#ffffff" opacity="0.03"/>
+
+  <!-- Card -->
+  <rect x="80" y="80" width="1040" height="470" rx="24" fill="url(#card)" stroke="#ffffff" stroke-opacity="0.1" stroke-width="2"/>
+
+  <!-- Logo icon -->
+  <rect x="120" y="130" width="80" height="80" rx="20" fill="#ffffff" opacity="0.15"/>
+  <g transform="translate(152, 162)" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0 20h32m-32 16h32m8 20H8a8 8 0 01-8-8V8a8 8 0 018-8h22.3a4 4 0 012.8 1.2l21.7 21.7a4 4 0 011.2 2.8V48a8 8 0 01-8 8z"/>
+  </g>
+
+  <!-- Title -->
+  <text x="220" y="178" font-family="system-ui, -apple-system, sans-serif" font-size="56" font-weight="800" fill="#ffffff" letter-spacing="-0.5">Preview<span fill="#93c5fd" font-size="56">.md</span></text>
+
+  <!-- Tagline -->
+  <text x="120" y="255" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="400" fill="#bfdbfe" letter-spacing="-0.3">A powerful, offline-capable Markdown editor with live preview</text>
+
+  <!-- Features -->
+  <g font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#e0e7ff">
+    <text x="120" y="340">✦ Syntax highlighting for 100+ languages</text>
+    <text x="120" y="380">✦ Mermaid diagrams, KaTeX math, GFM tables</text>
+    <text x="120" y="420">✦ Dark mode, PWA install, export to HTML/PDF</text>
+    <text x="120" y="460">✦ Split/stacked/tabbed layouts, command palette</text>
+  </g>
+
+  <!-- Footer -->
+  <text x="120" y="520" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#93c5fd" opacity="0.7">previewdotmd.pages.dev  ·  Free &amp; open source</text>
+</svg>
