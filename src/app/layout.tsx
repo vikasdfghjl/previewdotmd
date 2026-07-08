@@ -30,7 +30,7 @@ const SITE_URL =
     ? new URL(process.env.CF_PAGES_URL)
     : process.env.NEXT_PUBLIC_SITE_URL
       ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
-      : new URL("https://previewdotmd.pages.dev");
+      : new URL("https://previewdotmd.site");
 
 export const metadata: Metadata = {
   metadataBase: SITE_URL,
@@ -38,9 +38,9 @@ export const metadata: Metadata = {
   // Title: 58 chars — fits Google's ~60 char display limit with rich keyword coverage
   title: "Preview.md — Free Online Markdown Editor with Live Preview",
 
-  // Description: 158 chars — near Google's ~160 char limit, keyword-rich
+  // Description: 144 chars — under Google's ~160 char limit, keyword-rich
   description:
-    "A free, offline-capable Markdown editor with live preview, syntax highlighting, dark mode, Mermaid diagrams, KaTeX math, and export to HTML/PDF. Install as a PWA.",
+    "A free, offline-capable Markdown editor with live preview, syntax highlighting, dark mode, Mermaid diagrams, KaTeX math, and export to HTML/PDF.",
 
   keywords: [
     "markdown editor", "live preview", "markdown preview", "online markdown editor",
@@ -49,12 +49,19 @@ export const metadata: Metadata = {
     "mermaid diagrams", "katex math", "GFM markdown",
   ],
 
+  applicationName: "Preview.md",
+
   // Let search engines index and follow links
   robots: { index: true, follow: true },
 
-  // Canonical URL
+  // Canonical URL + language alternates (single source of truth — do not
+  // also hand-author these as <link> tags in the JSX head below)
   alternates: {
     canonical: SITE_URL.origin,
+    languages: {
+      en: SITE_URL.origin,
+      "x-default": SITE_URL.origin,
+    },
   },
 
   manifest: "/manifest.json",
@@ -63,6 +70,16 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "Preview.md",
+  },
+
+  formatDetection: {
+    telephone: false,
+  },
+
+  // Legacy iOS meta tag not covered by appleWebApp (which already emits
+  // mobile-web-app-capable, apple-mobile-web-app-title, and -status-bar-style)
+  other: {
+    "apple-mobile-web-app-capable": "yes",
   },
 
   icons: {
@@ -84,7 +101,7 @@ export const metadata: Metadata = {
     url: SITE_URL.origin,
     images: [
       {
-        url: "/og-image.svg",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "Preview.md — Markdown Editor with Live Preview",
@@ -97,7 +114,7 @@ export const metadata: Metadata = {
     title: "Preview.md — Free Online Markdown Editor",
     description:
       "Write markdown with live preview. Install as a PWA. Works offline. Syntax highlighting, Mermaid diagrams, KaTeX math, export to HTML/PDF.",
-    images: ["/og-image.svg"],
+    images: ["/og-image.png"],
   },
 };
 
@@ -112,16 +129,6 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="application-name" content="Preview.md" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Preview.md" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <link rel="canonical" href="https://previewdotmd.pages.dev/" />
-        <link rel="alternate" hrefLang="en" href="https://previewdotmd.pages.dev/" />
-        <link rel="alternate" hrefLang="x-default" href="https://previewdotmd.pages.dev/" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -129,7 +136,7 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'SoftwareApplication',
               name: 'Preview.md',
-              url: 'https://previewdotmd.pages.dev',
+              url: SITE_URL.origin,
               applicationCategory: 'DeveloperApplication',
               operatingSystem: 'Any',
               description:

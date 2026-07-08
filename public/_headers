@@ -11,7 +11,7 @@
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
 
 # OG image — cached for 7 days
-/og-image.svg
+/og-image.png
   Cache-Control: public, max-age=604800
 
 # Service worker — must never be cached
