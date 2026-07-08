@@ -9,9 +9,7 @@ import { useEffect, useState, useCallback } from 'react';
  */
 export function ServiceWorkerRegistration() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [isOffline, setIsOffline] = useState(() =>
-    typeof navigator !== 'undefined' ? !navigator.onLine : false
-  );
+  const [isOffline, setIsOffline] = useState(false);
   const [dismissed, setDismissed] = useState(false);
 
   // ── SW Registration ───────────────────────────────────
@@ -80,7 +78,23 @@ export function ServiceWorkerRegistration() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const goOffline = () => setIsOffline(true);
+    // navigator.onLine and the 'offline' event only reflect whether the OS
+    // reports a network interface as connected — not whether the site is
+    // actually reachable. It's known to false-positive (brief Wi-Fi/VPN
+    // blips, some browser network-stack quirks), so confirm with a real
+    // fetch before showing the banner instead of trusting it directly.
+    const verifyOffline = async () => {
+      try {
+        await fetch('/favicon.ico', { method: 'HEAD', cache: 'no-store' });
+        setIsOffline(false);
+      } catch {
+        setIsOffline(true);
+      }
+    };
+
+    if (!navigator.onLine) verifyOffline();
+
+    const goOffline = () => verifyOffline();
     const goOnline = () => setIsOffline(false);
 
     window.addEventListener('offline', goOffline);
