@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const DISMISSED_KEY = 'previewmd-storage-notice-dismissed';
 
@@ -18,7 +18,12 @@ function wasDismissed(): boolean {
  * only to this browser. Dismisses permanently when the user clicks "Got it".
  */
 export const StorageNotice: React.FC = () => {
-  const [visible, setVisible] = useState(() => !wasDismissed());
+  // Start hidden to match server-rendered output; check localStorage after mount to avoid a hydration mismatch.
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!wasDismissed()) setVisible(true);
+  }, []);
 
   if (!visible) return null;
 
