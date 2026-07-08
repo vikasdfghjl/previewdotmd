@@ -9,6 +9,15 @@ interface BeforeInstallPromptEvent extends Event {
 
 const DISMISSED_KEY = 'pwa-install-dismissed';
 
+function wasDismissed(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(DISMISSED_KEY) === '1';
+  } catch {
+    return false; // localStorage unavailable
+  }
+}
+
 /**
  * useInstallPrompt — captures the beforeinstallprompt event so the app
  * can show a custom install button instead of relying on the browser's
@@ -20,19 +29,10 @@ const DISMISSED_KEY = 'pwa-install-dismissed';
 export function useInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(wasDismissed);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // Check if user previously dismissed
-    try {
-      if (localStorage.getItem(DISMISSED_KEY) === '1') {
-        setIsDismissed(true);
-      }
-    } catch {
-      // localStorage unavailable
-    }
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();

@@ -16,8 +16,7 @@ export function createCommands(deps: {
   toggleFullscreen: () => void;
   toggleReadingMode: () => void;
   toggleSyncScroll: () => void;
-  setZoomLevel: (level: number) => void;
-  zoomLevelRef: { current: number };
+  setZoomLevel: (levelOrUpdater: number | ((prev: number) => number)) => void;
   setLayoutMode: (mode: LayoutMode) => void;
   handleReset: () => void;
 }): Command[] {
@@ -30,7 +29,6 @@ export function createCommands(deps: {
     toggleReadingMode,
     toggleSyncScroll,
     setZoomLevel,
-    zoomLevelRef,
     setLayoutMode,
     handleReset,
   } = deps;
@@ -104,7 +102,7 @@ export function createCommands(deps: {
       description: 'Increase preview zoom level',
       shortcut: 'Ctrl++',
       icon: Icons.zoomIn,
-      action: () => setZoomLevel(zoomLevelRef.current + 10),
+      action: () => setZoomLevel(prev => prev + 10),
       category: 'View',
     },
     {
@@ -113,7 +111,7 @@ export function createCommands(deps: {
       description: 'Decrease preview zoom level',
       shortcut: 'Ctrl+-',
       icon: Icons.zoomOut,
-      action: () => setZoomLevel(zoomLevelRef.current - 10),
+      action: () => setZoomLevel(prev => prev - 10),
       category: 'View',
     },
     {

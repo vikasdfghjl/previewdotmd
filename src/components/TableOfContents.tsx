@@ -24,29 +24,37 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
   const [collapsed, setCollapsed] = useState(false);     // inner collapse (hide list)
   const [isOpen, setIsOpen] = useState(true);             // entire panel open/closed
 
-  // Track which heading is currently in view
+  // Track which heading is currently in view — IntersectionObserver lets the
+  // browser do this off the main thread instead of reading offsetTop (forces
+  // layout) for every heading on every scroll event.
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container || headings.length === 0) return;
 
-    const handleScroll = () => {
-      const containerTop = container.scrollTop;
-      let currentId: string | null = null;
-      for (const h of headings) {
-        const el = document.getElementById(h.id);
-        if (el) {
-          const elTop = el.offsetTop - container.offsetTop;
-          if (elTop <= containerTop + 80) {
-            currentId = h.id;
+    const elements = headings
+      .map((h) => document.getElementById(h.id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (elements.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
           }
         }
+      },
+      {
+        root: container,
+        // Trigger when a heading crosses a line near the top of the viewport,
+        // matching the previous "80px from top" scroll-spy behavior.
+        rootMargin: '-80px 0px -70% 0px',
+        threshold: 0,
       }
-      setActiveId(currentId);
-    };
+    );
 
-    handleScroll();
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, [headings, scrollContainerRef]);
 
   const scrollToHeading = useCallback((id: string) => {

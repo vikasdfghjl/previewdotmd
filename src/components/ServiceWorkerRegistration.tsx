@@ -9,7 +9,9 @@ import { useEffect, useState, useCallback } from 'react';
  */
 export function ServiceWorkerRegistration() {
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline, setIsOffline] = useState(() =>
+    typeof navigator !== 'undefined' ? !navigator.onLine : false
+  );
   const [dismissed, setDismissed] = useState(false);
 
   // ── SW Registration ───────────────────────────────────
@@ -77,8 +79,6 @@ export function ServiceWorkerRegistration() {
   // ── Offline detection ─────────────────────────────────
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    setIsOffline(!navigator.onLine);
 
     const goOffline = () => setIsOffline(true);
     const goOnline = () => setIsOffline(false);

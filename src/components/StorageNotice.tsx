@@ -1,25 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const DISMISSED_KEY = 'previewmd-storage-notice-dismissed';
+
+function wasDismissed(): boolean {
+  if (typeof window === 'undefined') return true; // hide during server prerender
+  try {
+    return localStorage.getItem(DISMISSED_KEY) === '1';
+  } catch {
+    return true; // localStorage unavailable — no point showing the notice
+  }
+}
 
 /**
  * StorageNotice — shows a one-time notice that content is saved
  * only to this browser. Dismisses permanently when the user clicks "Got it".
  */
 export const StorageNotice: React.FC = () => {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(DISMISSED_KEY) !== '1') {
-        setVisible(true);
-      }
-    } catch {
-      // localStorage unavailable — no point showing the notice
-    }
-  }, []);
+  const [visible, setVisible] = useState(() => !wasDismissed());
 
   if (!visible) return null;
 

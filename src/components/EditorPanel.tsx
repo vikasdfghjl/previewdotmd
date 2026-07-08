@@ -86,11 +86,12 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
     goToPrevMatch,
   } = useFindReplace({ markdown, onChange, textareaRef });
 
-  // Bracket matching
+  // Bracket matching — scans the full document, so defer it like the
+  // syntax overlay to avoid blocking keystrokes on large documents.
   const {
     activeMatch: activeBracketMatch,
     handleCursorChange: handleBracketCursorChange,
-  } = useBracketMatching(markdown);
+  } = useBracketMatching(deferredMarkdown);
 
   useEditorShortcuts({
     markdown,

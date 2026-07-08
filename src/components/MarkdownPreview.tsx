@@ -36,11 +36,6 @@ const MarkdownPreview: React.FC = () => {
 
   const editorRef = useRef<EditorPanelRef>(null);
   const previewRef = useRef<PreviewPanelRef>(null);
-  // Ref to avoid zoomLevel in commands useMemo deps
-  const zoomLevelRef = useRef(zoomLevel);
-  useEffect(() => {
-    zoomLevelRef.current = zoomLevel;
-  }, [zoomLevel]);
 
   const {
     handleFileUpload,
@@ -60,7 +55,6 @@ const MarkdownPreview: React.FC = () => {
     toggleReadingMode,
     toggleSyncScroll,
     setZoomLevel,
-    zoomLevelRef,
     setLayoutMode,
     handleReset,
   }), [

@@ -20,7 +20,7 @@ interface LayoutActions {
   toggleSyncScroll: () => void;
   toggleFullscreen: () => void;
   toggleReadingMode: () => void;
-  setZoomLevel: (level: number) => void;
+  setZoomLevel: (levelOrUpdater: number | ((prev: number) => number)) => void;
   setActiveTab: (tab: ActiveTab) => void;
   setEditorWidth: (width: number) => void;
   resetLayout: () => void;
@@ -71,9 +71,12 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, readingMode: !prev.readingMode }));
   }, []);
 
-  const setZoomLevel = useCallback((level: number) => {
-    const clamped = Math.max(50, Math.min(200, level));
-    setState(prev => ({ ...prev, zoomLevel: clamped }));
+  const setZoomLevel = useCallback((levelOrUpdater: number | ((prev: number) => number)) => {
+    setState(prev => {
+      const level = typeof levelOrUpdater === 'function' ? levelOrUpdater(prev.zoomLevel) : levelOrUpdater;
+      const clamped = Math.max(50, Math.min(200, level));
+      return { ...prev, zoomLevel: clamped };
+    });
   }, []);
 
   const setActiveTab = useCallback((tab: ActiveTab) => {
