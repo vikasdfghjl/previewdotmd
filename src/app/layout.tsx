@@ -25,11 +25,15 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+// NEXT_PUBLIC_SITE_URL (the custom domain) takes priority so canonical/OG/JSON-LD
+// tags always point at previewdotmd.site in production. CF_PAGES_URL is Cloudflare's
+// auto-set *.pages.dev deployment URL — only used as a fallback (e.g. preview
+// deployments where NEXT_PUBLIC_SITE_URL isn't configured).
 const SITE_URL =
-  process.env.CF_PAGES_URL
-    ? new URL(process.env.CF_PAGES_URL)
-    : process.env.NEXT_PUBLIC_SITE_URL
-      ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+  process.env.NEXT_PUBLIC_SITE_URL
+    ? new URL(process.env.NEXT_PUBLIC_SITE_URL)
+    : process.env.CF_PAGES_URL
+      ? new URL(process.env.CF_PAGES_URL)
       : new URL("https://previewdotmd.site");
 
 export const metadata: Metadata = {
