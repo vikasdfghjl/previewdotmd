@@ -24,9 +24,7 @@ export const Resizer: React.FC<ResizerProps> = ({
     document.body.style.userSelect = 'none';
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDraggingRef.current) return;
-
+  const updateFromClientX = useCallback((clientX: number) => {
     const container = resizerRef.current?.parentElement;
     if (!container) return;
 
@@ -37,11 +35,16 @@ export const Resizer: React.FC<ResizerProps> = ({
     rafIdRef.current = requestAnimationFrame(() => {
       rafIdRef.current = null;
       const rect = container.getBoundingClientRect();
-      const percentage = ((e.clientX - rect.left) / rect.width) * 100;
+      const percentage = ((clientX - rect.left) / rect.width) * 100;
       const clamped = Math.max(minPercent, Math.min(maxPercent, percentage));
       onResize(clamped);
     });
   }, [onResize, minPercent, maxPercent]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    updateFromClientX(e.clientX);
+  }, [updateFromClientX]);
 
   const handleMouseUp = useCallback(() => {
     isDraggingRef.current = false;
@@ -49,28 +52,51 @@ export const Resizer: React.FC<ResizerProps> = ({
     document.body.style.userSelect = '';
   }, []);
 
+  const handleTouchStart = useCallback(() => {
+    isDraggingRef.current = true;
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDraggingRef.current) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    e.preventDefault();
+    updateFromClientX(touch.clientX);
+  }, [updateFromClientX]);
+
+  const handleTouchEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    document.body.style.userSelect = '';
+  }, []);
+
   useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
       if (rafIdRef.current !== null) {
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [handleMouseMove, handleMouseUp]);
+  }, [handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   return (
     <div
       ref={resizerRef}
       onMouseDown={handleMouseDown}
-      className="w-1 flex-shrink-0 cursor-col-resize bg-transparent hover:bg-blue-400 dark:hover:bg-blue-500 transition-colors group relative z-10"
+      onTouchStart={handleTouchStart}
+      className="w-1 flex-shrink-0 cursor-col-resize bg-transparent hover:bg-blue-400 dark:hover:bg-blue-500 transition-colors group relative z-10 touch-none"
       title="Drag to resize"
     >
-      {/* Visual indicator */}
-      <div className="absolute inset-y-0 -left-1 -right-1 flex items-center justify-center">
+      {/* Visual indicator — widened tap target on touch devices */}
+      <div className="absolute inset-y-0 -left-3 -right-3 sm:-left-1 sm:-right-1 flex items-center justify-center">
         <div className="w-0.5 h-8 rounded-full bg-gray-300 dark:bg-gray-600 group-hover:bg-blue-500 dark:group-hover:bg-blue-400 transition-colors" />
       </div>
     </div>

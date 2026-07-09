@@ -88,11 +88,7 @@ export const AnchorHeading: React.FC<AnchorHeadingProps> = ({
   return (
     <Tag
       id={id}
-      className={`
-        group relative flex items-center gap-2 cursor-pointer
-        text-gray-900 dark:text-gray-100
-        ${sizeClasses}
-      `}
+      className={`group relative flex items-center gap-2 cursor-pointer text-gray-900 dark:text-gray-100 ${sizeClasses}`}
       onClick={handleClick}
       title="Click to copy link to this section"
     >
@@ -100,13 +96,7 @@ export const AnchorHeading: React.FC<AnchorHeadingProps> = ({
       
       {/* Anchor link icon - visible on hover */}
       <span
-        className="
-          opacity-0 group-hover:opacity-100 
-          transition-opacity duration-200
-          text-gray-400 hover:text-blue-500 dark:hover:text-blue-400
-          flex items-center justify-center
-          w-6 h-6 rounded hover:bg-gray-100 dark:hover:bg-gray-800
-        "
+        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 flex items-center justify-center w-6 h-6 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
         aria-hidden="true"
       >
         {Icons.link}
@@ -115,15 +105,7 @@ export const AnchorHeading: React.FC<AnchorHeadingProps> = ({
       {/* Copied tooltip */}
       {showCopied && (
         <span
-          className="
-            absolute -top-8 left-1/2 -translate-x-1/2
-            px-2 py-1 text-xs font-medium
-            bg-gray-800 dark:bg-gray-700 text-white
-            rounded shadow-lg
-            animate-fade-in
-            whitespace-nowrap
-            z-10
-          "
+          className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 text-xs font-medium bg-gray-800 dark:bg-gray-700 text-white rounded shadow-lg animate-fade-in whitespace-nowrap z-10"
           role="status"
           aria-live="polite"
         >

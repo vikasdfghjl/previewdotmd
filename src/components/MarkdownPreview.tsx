@@ -244,7 +244,7 @@ const MarkdownPreview: React.FC = () => {
           <>
             {/* Editor Panel - Tabbed (skip mount when preview tab is active) */}
             {activeTab === 'editor' && !readingMode && (
-              <div className="flex-1">
+              <div className="flex-1 min-h-0">
                 <EditorPanel
                   ref={editorRef}
                   markdown={markdown}
@@ -265,7 +265,7 @@ const MarkdownPreview: React.FC = () => {
 
             {/* Preview Panel - Tabbed (skip mount when editor tab is active) */}
             {activeTab === 'preview' && (
-              <div className="flex-1">
+              <div className="flex-1 min-h-0">
                 <PreviewPanel
                   ref={previewRef}
                   markdown={previewMarkdown}
@@ -284,8 +284,8 @@ const MarkdownPreview: React.FC = () => {
       </main>
 
       {/* Mobile layout controls */}
-      <div className="md:hidden fixed bottom-4 right-4 z-40">
-        <LayoutControls className="flex bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-1" />
+      <div className="md:hidden fixed bottom-4 right-4 z-40 max-w-[calc(100vw-2rem)]">
+        <LayoutControls className="flex overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-1" />
       </div>
 
       {/* Command Palette */}

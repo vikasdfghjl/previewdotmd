@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 
 // Single Responsibility: Layout mode definitions
 export type LayoutMode = 'split' | 'stacked' | 'tabbed';
@@ -51,17 +51,21 @@ const DEFAULT_EDITOR_WIDTH = 50;
 
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
   // Slow-changing layout state (mode, toggles, tabs, zoom).
-  // Defaults to 'tabbed' on narrow viewports — split view leaves each pane
-  // too cramped to be usable on a phone. Same lazy-init-from-matchMedia
-  // pattern as ThemeContext's system-preference check.
-  const [state, setState] = useState<LayoutState>(() => {
-    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
-      return { ...DEFAULT_STATE, layoutMode: 'tabbed' };
-    }
-    return DEFAULT_STATE;
-  });
+  // Always starts from DEFAULT_STATE so the client's first render matches
+  // the server-rendered HTML (SSR has no `window`, so it can't know the
+  // viewport size — branching on matchMedia here would mismatch on hydration).
+  const [state, setState] = useState<LayoutState>(DEFAULT_STATE);
   // Fast-changing editor width (updated per-frame during resize drag)
   const [editorWidth, setEditorWidthState] = useState<number>(DEFAULT_EDITOR_WIDTH);
+
+  // Defaults to 'tabbed' on narrow viewports — split view leaves each pane
+  // too cramped to be usable on a phone. Runs post-hydration (client-only)
+  // so it doesn't affect the first render that has to match SSR output.
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      setState(prev => ({ ...prev, layoutMode: 'tabbed' }));
+    }
+  }, []);
 
   const setLayoutMode = useCallback((mode: LayoutMode) => {
     setState(prev => ({ ...prev, layoutMode: mode }));

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(export NODE_PATH=\"C:\\\\Users\\\\vikas\\\\AppData\\\\Local\\\\npm-cache/_npx/705bc6b22212b352/node_modules\")",
+      "Bash(node \"C:/Users/vikas/AppData/Local/Temp/claude/C--Users-vikas-Projects-previewdotmd/557893ea-0169-4ad1-ae19-578049c5e240/scratchpad/verify-split-click.js\")"
     ],
     "deny": [],
     "ask": []
