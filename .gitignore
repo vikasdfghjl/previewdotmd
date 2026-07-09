@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# nyc (istanbul) output
+/.nyc_output
+
 # next.js
 /.next/
 /out/
@@ -20,9 +23,17 @@
 # production
 /build
 
+# distribution folders
+/dist
+
 # misc
 .DS_Store
 *.pem
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+desktop.ini
 
 # debug
 npm-debug.log*
@@ -30,12 +41,40 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# general logs
+logs
+*.log
+
 # env files (can opt-in for committing if needed)
 .env*
+
+# keep an example env if present
+!.env.example
 
 # vercel
 .vercel
 
+# vercel build output
+.vercel_build_output
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# editor / IDE
+.vscode/
+.idea/
+*.code-workspace
+.claude/
+
+# cache / tooling
+/.cache
+/.parcel-cache
+/.turbo
+/.next/cache
+/node_modules/.cache
+
+# local database files
+*.sqlite
+*.db
+*.sqlite3
