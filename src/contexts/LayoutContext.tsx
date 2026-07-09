@@ -50,8 +50,16 @@ const DEFAULT_STATE: LayoutState = {
 const DEFAULT_EDITOR_WIDTH = 50;
 
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
-  // Slow-changing layout state (mode, toggles, tabs, zoom)
-  const [state, setState] = useState<LayoutState>(DEFAULT_STATE);
+  // Slow-changing layout state (mode, toggles, tabs, zoom).
+  // Defaults to 'tabbed' on narrow viewports — split view leaves each pane
+  // too cramped to be usable on a phone. Same lazy-init-from-matchMedia
+  // pattern as ThemeContext's system-preference check.
+  const [state, setState] = useState<LayoutState>(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+      return { ...DEFAULT_STATE, layoutMode: 'tabbed' };
+    }
+    return DEFAULT_STATE;
+  });
   // Fast-changing editor width (updated per-frame during resize drag)
   const [editorWidth, setEditorWidthState] = useState<number>(DEFAULT_EDITOR_WIDTH);
 

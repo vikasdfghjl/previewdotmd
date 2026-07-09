@@ -223,21 +223,21 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
   const actions = (
     <>
       <ActionButton onClick={() => fileInputRef.current?.click()} title="Upload markdown file">
-        <div className="flex items-center gap-1.5">{Icons.upload}<span>Upload</span></div>
+        <div className="flex items-center gap-1.5">{Icons.upload}<span className="hidden sm:inline">Upload</span></div>
       </ActionButton>
       <ActionButton onClick={toggleFindReplace} title="Find & Replace (Ctrl+F)">
-        <div className="flex items-center gap-1.5">{Icons.search}<span>Find</span></div>
+        <div className="flex items-center gap-1.5">{Icons.search}<span className="hidden sm:inline">Find</span></div>
       </ActionButton>
       {onDownload && (
         <ActionButton onClick={onDownload} title="Download markdown file">
-          <div className="flex items-center gap-1.5">{Icons.download}<span>Download</span></div>
+          <div className="flex items-center gap-1.5">{Icons.download}<span className="hidden sm:inline">Download</span></div>
         </ActionButton>
       )}
       <ActionButton onClick={() => setShowClearConfirm(true)} title="Clear all markdown content" variant="danger">
-        <div className="flex items-center gap-1.5">{Icons.trash}<span>Clear All</span></div>
+        <div className="flex items-center gap-1.5">{Icons.trash}<span className="hidden sm:inline">Clear All</span></div>
       </ActionButton>
       <ActionButton onClick={onReset} title="Load the demo example document">
-        <div className="flex items-center gap-1.5">{Icons.reset}<span>Load Example</span></div>
+        <div className="flex items-center gap-1.5">{Icons.reset}<span className="hidden sm:inline">Load Example</span></div>
       </ActionButton>
     </>
   );

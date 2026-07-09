@@ -3,15 +3,19 @@
 import React from 'react';
 import { LayoutControls } from './LayoutControls';
 import { DarkModeToggle } from './DarkModeToggle';
+import { ToolbarButton } from './ToolbarButton';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Icons } from '@/constants/icons';
 
 interface HeaderProps {
   githubUrl: string;
+  /** Opens the command palette — surfaced as a button on mobile, where there's no keyboard for Ctrl+Shift+P. */
+  onOpenCommandPalette?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   githubUrl,
+  onOpenCommandPalette,
 }) => {
   const { showInstall, promptInstall } = useInstallPrompt();
 
@@ -35,6 +39,14 @@ export const Header: React.FC<HeaderProps> = ({
 
       <div className="flex items-center gap-2">
         <LayoutControls className="hidden md:flex" />
+
+        {onOpenCommandPalette && (
+          <div className="md:hidden">
+            <ToolbarButton onClick={onOpenCommandPalette} title="Command palette">
+              {Icons.search}
+            </ToolbarButton>
+          </div>
+        )}
 
         <DarkModeToggle />
 

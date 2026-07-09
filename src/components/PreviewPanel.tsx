@@ -98,7 +98,7 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
       >
         <div className="flex items-center gap-1.5">
           {Icons.download}
-          <span>Export</span>
+          <span className="hidden sm:inline">Export</span>
         </div>
       </ActionButton>
 

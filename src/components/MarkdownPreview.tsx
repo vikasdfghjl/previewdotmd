@@ -81,6 +81,7 @@ const MarkdownPreview: React.FC = () => {
     selectPrev: selectPrevCommand,
     executeSelected: executeSelectedCommand,
     close: closeCommandPalette,
+    open: openCommandPalette,
   } = useCommandPalette({ commands });
 
   // Sync scroll handlers
@@ -133,6 +134,7 @@ const MarkdownPreview: React.FC = () => {
       {!fullscreen && (
         <Header
           githubUrl={APP_CONFIG.github.url}
+          onOpenCommandPalette={openCommandPalette}
         />
       )}
 
