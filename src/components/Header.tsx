@@ -30,11 +30,6 @@ export const Header: React.FC<HeaderProps> = ({
             Preview<span className="text-blue-500">.md</span>
           </h1>
         </div>
-
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-opacity-10 bg-blue-500">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-xs font-medium text-secondary">Live editing</span>
-        </div>
       </div>
 
       <div className="flex items-center gap-2">

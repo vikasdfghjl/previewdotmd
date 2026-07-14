@@ -10,6 +10,7 @@ import { remarkPlugins, rehypePlugins } from '@/lib/markdownPlugins';
 import { scrollToPercentage, getScrollPercentage } from '@/lib/scroll';
 import { useHeadings } from '@/hooks/useHeadings';
 import { TableOfContents } from './TableOfContents';
+import { MobileTableOfContents } from './MobileTableOfContents';
 import { MathStyles } from './MathStyles';
 import { Icons } from '@/constants/icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -152,7 +153,12 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
         title="Live Preview"
         subtitle="Formatted output"
         icon={Icons.eye}
-        actions={exportActions}
+        actions={
+          <>
+            <MobileTableOfContents headings={headings} />
+            {exportActions}
+          </>
+        }
         onToggle={onToggle}
         isHidden={!isVisible}
       />
@@ -199,14 +205,10 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
 
       <MathStyles markdown={markdown} />
 
-      {/* Footer with preview info */}
-      <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-secondary">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          <span>Real-time preview</span>
-        </div>
+      {/* Footer — parsing mode + sync scroll state. "Real-time preview" was
+          dropped: it was a static label that never conveyed real state,
+          redundant with the Saved/Unsaved indicator in the editor footer. */}
+      <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-end">
         <div className="flex items-center gap-3">
           <ScrollSyncIndicator isActive={syncScrollActive} />
           <div className="flex items-center gap-2 text-xs text-secondary">

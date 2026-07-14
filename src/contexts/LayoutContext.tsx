@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 
 // Single Responsibility: Layout mode definitions
 export type LayoutMode = 'split' | 'stacked' | 'tabbed';
@@ -49,6 +49,33 @@ const DEFAULT_STATE: LayoutState = {
 
 const DEFAULT_EDITOR_WIDTH = 50;
 
+const PREFS_KEY = 'previewmd-layout-prefs';
+const LAYOUT_MODES: LayoutMode[] = ['split', 'stacked', 'tabbed'];
+
+interface PersistedPrefs {
+  layoutMode?: LayoutMode;
+  syncScroll?: boolean;
+  zoomLevel?: number;
+  editorWidth?: number;
+}
+
+/** Reads and sanitizes persisted layout preferences; null when absent/invalid. */
+function loadPrefs(): PersistedPrefs | null {
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PersistedPrefs;
+    const prefs: PersistedPrefs = {};
+    if (LAYOUT_MODES.includes(parsed.layoutMode as LayoutMode)) prefs.layoutMode = parsed.layoutMode;
+    if (typeof parsed.syncScroll === 'boolean') prefs.syncScroll = parsed.syncScroll;
+    if (typeof parsed.zoomLevel === 'number') prefs.zoomLevel = Math.max(50, Math.min(200, parsed.zoomLevel));
+    if (typeof parsed.editorWidth === 'number') prefs.editorWidth = Math.max(10, Math.min(90, parsed.editorWidth));
+    return prefs;
+  } catch {
+    return null;
+  }
+}
+
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
   // Slow-changing layout state (mode, toggles, tabs, zoom).
   // Always starts from DEFAULT_STATE so the client's first render matches
@@ -58,16 +85,49 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   // Fast-changing editor width (updated per-frame during resize drag)
   const [editorWidth, setEditorWidthState] = useState<number>(DEFAULT_EDITOR_WIDTH);
 
-  // Defaults to 'tabbed' on narrow viewports — split view leaves each pane
-  // too cramped to be usable on a phone. Runs post-hydration (client-only)
-  // so it doesn't affect the first render that has to match SSR output.
+  // True once the user explicitly picks a layout this session — from then on
+  // viewport changes stop auto-switching the mode out from under them.
+  const userChoseLayoutRef = useRef(false);
+  // Guards the persist effect so defaults aren't written before prefs load.
+  const prefsLoadedRef = useRef(false);
+
+  // Restore persisted preferences and adapt the layout to the viewport.
+  // Runs post-hydration (client-only) so it doesn't affect the first render,
+  // which has to match SSR output (the server can't know viewport or prefs).
   useEffect(() => {
-    if (window.matchMedia('(max-width: 767px)').matches) {
-      setState(prev => ({ ...prev, layoutMode: 'tabbed' }));
-    }
+    const prefs = loadPrefs();
+    const mq = window.matchMedia('(max-width: 767px)');
+
+    // Narrow viewports always start tabbed — split view leaves each pane too
+    // cramped on a phone, even if a wider device persisted another mode.
+    const initialMode: LayoutMode = mq.matches
+      ? 'tabbed'
+      : prefs?.layoutMode ?? DEFAULT_STATE.layoutMode;
+
+    setState(prev => ({
+      ...prev,
+      layoutMode: initialMode,
+      syncScroll: prefs?.syncScroll ?? prev.syncScroll,
+      zoomLevel: prefs?.zoomLevel ?? prev.zoomLevel,
+    }));
+    if (prefs?.editorWidth !== undefined) setEditorWidthState(prefs.editorWidth);
+    prefsLoadedRef.current = true;
+
+    // Rotation / window resize across the breakpoint re-picks the mode,
+    // unless the user explicitly chose one this session.
+    const onChange = (e: MediaQueryListEvent) => {
+      if (userChoseLayoutRef.current) return;
+      setState(prev => ({
+        ...prev,
+        layoutMode: e.matches ? 'tabbed' : loadPrefs()?.layoutMode ?? DEFAULT_STATE.layoutMode,
+      }));
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
   }, []);
 
   const setLayoutMode = useCallback((mode: LayoutMode) => {
+    userChoseLayoutRef.current = true;
     setState(prev => ({ ...prev, layoutMode: mode }));
   }, []);
 
@@ -101,9 +161,38 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const resetLayout = useCallback(() => {
+    userChoseLayoutRef.current = false;
+    try {
+      localStorage.removeItem(PREFS_KEY);
+    } catch {
+      // storage unavailable — non-fatal
+    }
     setState(DEFAULT_STATE);
     setEditorWidthState(DEFAULT_EDITOR_WIDTH);
   }, []);
+
+  // Persist preferences (debounced — editorWidth updates per-frame while the
+  // split divider is dragged). An auto-selected mode (narrow viewport →
+  // tabbed) is NOT saved as the layout preference; only explicit choices are,
+  // so a phone session doesn't overwrite the mode picked on desktop.
+  useEffect(() => {
+    if (!prefsLoadedRef.current) return;
+    const timer = setTimeout(() => {
+      try {
+        const layoutMode = userChoseLayoutRef.current ? state.layoutMode : loadPrefs()?.layoutMode;
+        const prefs: PersistedPrefs = {
+          ...(layoutMode !== undefined && { layoutMode }),
+          syncScroll: state.syncScroll,
+          zoomLevel: state.zoomLevel,
+          editorWidth,
+        };
+        localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+      } catch {
+        // storage full/unavailable — non-fatal
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [state.layoutMode, state.syncScroll, state.zoomLevel, editorWidth]);
 
   // Memoize actions — stable reference, never changes
   const actions = useMemo<LayoutActions>(() => ({

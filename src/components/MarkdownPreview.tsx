@@ -10,7 +10,7 @@ import { PreviewPanel, PreviewPanelRef } from './PreviewPanel';
 import { LayoutControls } from './LayoutControls';
 import { Resizer } from './Resizer';
 import { Header } from './Header';
-import { TabBar } from './TabBar';
+import { TabBar, tabPanelId } from './TabBar';
 import { CommandPalette } from './CommandPalette';
 import { APP_CONFIG } from '@/constants/config';
 import { Icons } from '@/constants/icons';
@@ -244,43 +244,50 @@ const MarkdownPreview: React.FC = () => {
           </>
         ) : (
           <>
-            {/* Editor Panel - Tabbed (skip mount when preview tab is active) */}
-            {activeTab === 'editor' && !readingMode && (
-              <div className="flex-1 min-h-0">
-                <EditorPanel
-                  ref={editorRef}
-                  markdown={markdown}
-                  onChange={handleChange}
-                  onClear={handleClear}
-                  onReset={handleReset}
-                  isVisible={true}
-                  onFileUpload={handleFileUpload}
-                  onDownload={downloadMarkdown}
-                  onScroll={handleEditorScroll}
-                  zoomLevel={zoomLevel}
-                  lastSaved={lastSaved}
-                  isDirty={isDirty}
-                  storageWarning={storageWarning}
-                />
-              </div>
-            )}
+            {/* Tabbed panels stay mounted and toggle via CSS — unmounting the
+                editor would discard the textarea's undo history every time
+                the user peeks at the preview. */}
+            <div
+              id={tabPanelId('editor')}
+              role="tabpanel"
+              aria-labelledby="editor-tab"
+              className={activeTab === 'editor' && !readingMode ? 'flex-1 min-h-0' : 'hidden'}
+            >
+              <EditorPanel
+                ref={editorRef}
+                markdown={markdown}
+                onChange={handleChange}
+                onClear={handleClear}
+                onReset={handleReset}
+                isVisible={true}
+                onFileUpload={handleFileUpload}
+                onDownload={downloadMarkdown}
+                onScroll={handleEditorScroll}
+                zoomLevel={zoomLevel}
+                lastSaved={lastSaved}
+                isDirty={isDirty}
+                storageWarning={storageWarning}
+              />
+            </div>
 
-            {/* Preview Panel - Tabbed (skip mount when editor tab is active) */}
-            {activeTab === 'preview' && (
-              <div className="flex-1 min-h-0">
-                <PreviewPanel
-                  ref={previewRef}
-                  markdown={previewMarkdown}
-                  isVisible={true}
-                  onExportHtml={exportAsHtml}
-                  onExportPdf={exportAsPdf}
-                  onExportPlainText={exportAsPlainText}
-                  zoomLevel={zoomLevel}
-                  onScroll={handlePreviewScroll}
-                  syncScrollActive={syncScroll}
-                />
-              </div>
-            )}
+            <div
+              id={tabPanelId('preview')}
+              role="tabpanel"
+              aria-labelledby="preview-tab"
+              className={activeTab === 'preview' || readingMode ? 'flex-1 min-h-0' : 'hidden'}
+            >
+              <PreviewPanel
+                ref={previewRef}
+                markdown={previewMarkdown}
+                isVisible={true}
+                onExportHtml={exportAsHtml}
+                onExportPdf={exportAsPdf}
+                onExportPlainText={exportAsPlainText}
+                zoomLevel={zoomLevel}
+                onScroll={handlePreviewScroll}
+                syncScrollActive={syncScroll}
+              />
+            </div>
           </>
         )}
       </main>

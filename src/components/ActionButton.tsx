@@ -27,7 +27,7 @@ export const ActionButton: React.FC<ActionButtonProps> = ({
   return (
     <button
       onClick={onClick}
-      className={`${getVariantClasses()} px-3 py-1.5 text-xs font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-200`}
+      className={`${getVariantClasses()} px-3 py-1.5 pointer-coarse:min-h-11 text-xs font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400 dark:focus:ring-gray-500 transition-all duration-200`}
       title={title}
     >
       {children}

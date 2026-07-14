@@ -41,7 +41,7 @@ export const StorageNotice: React.FC = () => {
             // ignore
           }
         }}
-        className="ml-auto px-2 py-0.5 rounded bg-blue-200 dark:bg-blue-800 hover:bg-blue-300 dark:hover:bg-blue-700 text-blue-800 dark:text-blue-200 font-medium transition-colors flex-shrink-0"
+        className="ml-auto px-2 py-0.5 pointer-coarse:min-h-11 pointer-coarse:px-3 rounded bg-blue-200 dark:bg-blue-800 hover:bg-blue-300 dark:hover:bg-blue-700 text-blue-800 dark:text-blue-200 font-medium transition-colors flex-shrink-0"
       >
         Got it
       </button>

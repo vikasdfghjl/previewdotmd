@@ -34,13 +34,14 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '' }
 
   return (
     <div className={`flex items-center gap-1 ${className}`}>
-      {/* Layout mode selector */}
-      <div className="flex items-center gap-0.5 px-1 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800">
+      {/* Layout mode selector — mutually exclusive, so it's a radio group rather than independent toggles */}
+      <div role="radiogroup" aria-label="Layout mode" className="flex items-center gap-0.5 px-1 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800">
         {layoutModes.map(({ mode, label, icon }) => (
           <ToolbarButton
             key={mode}
             onClick={() => setLayoutMode(mode)}
             isActive={layoutMode === mode}
+            isRadio
             title={label}
           >
             {icon}
@@ -55,6 +56,7 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '' }
       <ToolbarButton
         onClick={toggleSyncScroll}
         isActive={syncScroll}
+        isToggle
         title={syncScroll ? 'Disable sync scroll' : 'Enable sync scroll'}
       >
         {Icons.syncScroll}
@@ -64,6 +66,7 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '' }
       <ToolbarButton
         onClick={toggleReadingMode}
         isActive={readingMode}
+        isToggle
         title={readingMode ? 'Exit reading mode' : 'Reading mode'}
       >
         {Icons.eye}
@@ -73,6 +76,7 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '' }
       <ToolbarButton
         onClick={toggleFullscreen}
         isActive={fullscreen}
+        isToggle
         title={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
       >
         {Icons.fullscreen}
