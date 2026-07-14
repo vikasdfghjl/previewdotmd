@@ -79,6 +79,13 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
         {...props}
       />
     ),
+    // Wide tables scroll inside their own container instead of forcing the
+    // whole preview document to pan horizontally (worst on phones).
+    table: ({ children, ...props }: any) => (
+      <div className="overflow-x-auto">
+        <table {...props}>{children}</table>
+      </div>
+    ),
   }), [isDark]);
   /* eslint-enable @typescript-eslint/no-explicit-any */
 

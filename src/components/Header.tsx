@@ -38,10 +38,13 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <LayoutControls className="hidden md:flex" />
+        {/* Inline controls need ~1050px of header; below lg they live in the
+            docked bottom bar instead (see MarkdownPreview), so the header
+            never overflows the viewport on tablets. */}
+        <LayoutControls className="hidden lg:flex" />
 
         {onOpenCommandPalette && (
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <ToolbarButton onClick={onOpenCommandPalette} title="Command palette">
               {Icons.search}
             </ToolbarButton>

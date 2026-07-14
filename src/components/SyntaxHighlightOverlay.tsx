@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { BracketMatch } from '@/hooks/useBracketMatching';
 
 interface SyntaxHighlightOverlayProps {
@@ -9,10 +9,19 @@ interface SyntaxHighlightOverlayProps {
   zoomLevel?: number;
 }
 
-/** Syntax highlighting rules — data-driven so new rules can be added without modifying logic. */
-const SYNTAX_RULES: Array<{ pattern: RegExp; className: string; replacement?: string }> = [
+/**
+ * Syntax highlighting rules — data-driven so new rules can be added without
+ * modifying logic.
+ *
+ * IMPORTANT: the overlay is the *visible* text of the editor and must stay
+ * character-for-character identical to the textarea content, or the caret
+ * and soft-wrap positions drift. Rules therefore wrap the whole match (`$&`)
+ * in a span and must never use classes that change glyph advance widths
+ * (no horizontal padding, letter-spacing, or non-mono font swaps).
+ */
+const SYNTAX_RULES: Array<{ pattern: RegExp; className: string }> = [
   // Headers
-  { pattern: /^(#{1,6}\s.*?)$/, className: 'text-purple-600 dark:text-purple-400 font-bold' },
+  { pattern: /^#{1,6}\s.*$/, className: 'text-purple-600 dark:text-purple-400 font-bold' },
   // Bold
   { pattern: /(\*\*|__)(.*?)\1/g, className: 'text-blue-600 dark:text-blue-400 font-bold' },
   // Italic
@@ -20,39 +29,37 @@ const SYNTAX_RULES: Array<{ pattern: RegExp; className: string; replacement?: st
   // Code blocks
   { pattern: /(```|~~~)(\w*)/g, className: 'text-green-600 dark:text-green-400' },
   // Inline code
-  { pattern: /`([^`]+)`/g, className: 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-0.5 rounded' },
+  { pattern: /`([^`]+)`/g, className: 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 rounded' },
+  // Images (before links — an image is a link with a leading `!`)
+  { pattern: /!\[([^\]]*)\]\(([^)]+)\)/g, className: 'text-cyan-600 dark:text-cyan-400' },
   // Links
   { pattern: /\[([^\]]+)\]\(([^)]+)\)/g, className: 'text-cyan-600 dark:text-cyan-400' },
-  // Images
-  { pattern: /!\[([^\]]+)\]\(([^)]+)\)/g, className: 'text-cyan-600 dark:text-cyan-400' },
   // Blockquotes
-  { pattern: /^(&gt;\s.*?)$/, className: 'text-gray-500 dark:text-gray-400' },
+  { pattern: /^&gt;\s.*$/, className: 'text-gray-500 dark:text-gray-400' },
   // Unordered lists
-  { pattern: /^(\s*[-*+]\s)/, className: 'text-orange-500' },
+  { pattern: /^\s*[-*+]\s/, className: 'text-orange-500' },
   // Ordered lists
-  { pattern: /^(\s*\d+\.\s)/, className: 'text-orange-500' },
+  { pattern: /^\s*\d+\.\s/, className: 'text-orange-500' },
   // Horizontal rules
-  { pattern: /^([-*_]{3,})$/, className: 'text-gray-400' },
+  { pattern: /^[-*_]{3,}$/, className: 'text-gray-400' },
 ];
 
-function highlightMarkdown(text: string, activeBracketMatch?: BracketMatch | null): string {
-  const lines = text.split('\n');
+/** Highlights one line of markdown; returns an HTML string. */
+function highlightLine(line: string, lineIndex: number, activeBracketMatch?: BracketMatch | null): string {
+  let html = escapeHtml(line);
 
-  return lines.map((line, lineIndex) => {
-    let html = escapeHtml(line);
+  // Apply each syntax rule in order, wrapping the whole match so no
+  // characters are added or removed relative to the textarea content.
+  for (const { pattern, className } of SYNTAX_RULES) {
+    html = html.replace(pattern, `<span class="${className}">$&</span>`);
+  }
 
-    // Apply each syntax rule in order
-    for (const { pattern, className } of SYNTAX_RULES) {
-      html = html.replace(pattern, `<span class="${className}">$1</span>`);
-    }
+  // Bracket matching highlighting
+  if (activeBracketMatch) {
+    html = highlightBracketMatch(html, lineIndex, activeBracketMatch);
+  }
 
-    // Bracket matching highlighting
-    if (activeBracketMatch) {
-      html = highlightBracketMatch(html, lineIndex, activeBracketMatch);
-    }
-
-    return html;
-  }).join('\n');
+  return html;
 }
 
 function escapeHtml(text: string): string {
@@ -70,7 +77,8 @@ function highlightBracketMatch(html: string, lineIndex: number, match: BracketMa
 
   // For simplicity, we'll add a background highlight to the brackets
   // Since we've already escaped HTML, we need to work with the escaped content
-  const bracketClass = 'bg-yellow-300 dark:bg-yellow-600 rounded px-0.5';
+  // No horizontal padding — it would shift glyphs relative to the textarea.
+  const bracketClass = 'bg-yellow-300 dark:bg-yellow-600 rounded';
 
   if (isOpenLine && isCloseLine) {
     // Both on same line - this is rare but possible
@@ -112,20 +120,36 @@ function highlightCharAtPosition(html: string, position: number, className: stri
   return html;
 }
 
+/**
+ * SyntaxHighlightOverlay — the visible text layer of the editor.
+ *
+ * Rendered in normal flow (it defines the editor's content height) beneath a
+ * transparent textarea. Both share the `editor-text` metrics class and the
+ * same padding utilities, so the caret and selection line up with this text.
+ * Each logical line is its own div; the line number is drawn by the
+ * `.editor-line::before` counter in globals.css, which keeps numbers aligned
+ * even when long lines soft-wrap.
+ */
 export const SyntaxHighlightOverlay: React.FC<SyntaxHighlightOverlayProps> = React.memo(({
   markdown,
   activeBracketMatch,
   zoomLevel,
 }) => {
-  const highlightedHtml = highlightMarkdown(markdown, activeBracketMatch);
+  const lines = useMemo(
+    () => markdown.split('\n').map((line, i) => highlightLine(line, i, activeBracketMatch)),
+    [markdown, activeBracketMatch],
+  );
 
   return (
-    <pre
-      className="absolute inset-0 w-full h-full font-mono text-sm p-4 pt-4 pb-4 leading-5 whitespace-pre-wrap break-words pointer-events-none overflow-hidden"
+    <div
+      className="editor-lines editor-text relative whitespace-pre-wrap break-words py-4 pr-4 pl-16 pointer-events-none select-none"
       style={{ fontSize: `${zoomLevel ?? 100}%` }}
       aria-hidden="true"
-      dangerouslySetInnerHTML={{ __html: highlightedHtml + '\n' }}
-    />
+    >
+      {lines.map((html, i) => (
+        <div key={i} className="editor-line" dangerouslySetInnerHTML={{ __html: html }} />
+      ))}
+    </div>
   );
 });
 

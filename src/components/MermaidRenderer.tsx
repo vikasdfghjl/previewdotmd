@@ -49,7 +49,14 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
 
         const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
         const { svg: renderedSvg } = await mermaid.render(id, chart.trim());
-        if (!cancelled) setSvg(renderedSvg);
+        // Mermaid emits width="100%" capped by a natural-size max-width,
+        // which scales wide diagrams down to the container — unreadably
+        // small on phones. Give the svg its natural width instead and let
+        // the overflow-auto container scroll horizontally.
+        const naturalSvg = renderedSvg
+          .replace(/max-width:\s*([\d.]+)px;?/, 'width: $1px;')
+          .replace(/\swidth="100%"/, '');
+        if (!cancelled) setSvg(naturalSvg);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : 'Failed to render diagram');

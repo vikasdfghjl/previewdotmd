@@ -126,31 +126,46 @@ h1, h2, h3, h4, h5, h6 {
   background-clip: padding-box;
 }
 
-/* Editor textarea styling - Professional appearance */
-textarea {
-  tab-size: 2;
-  background-color: var(--panel-bg);
-  color: var(--text-primary);
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  padding: 1.25rem;
+/* Editor text metrics — single source of truth shared by the textarea and
+   the syntax-highlight overlay. Both layers MUST compute identical font,
+   size, and line-height or the caret/selection drifts away from the visible
+   text (the textarea's own text is transparent; the overlay is what you see).
+   Zoom is applied as an inline font-size percentage on both elements; the
+   relative line-height scales with it automatically. */
+.editor-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 14px;
   line-height: 1.6;
-}
-
-textarea:focus {
-  outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.dark textarea:focus {
-  box-shadow: 0 0 0 3px rgba(108, 153, 224, 0.2);
+  tab-size: 2;
 }
 
 textarea::placeholder {
   color: var(--text-secondary);
   opacity: 0.7;
+}
+
+/* Line numbers — drawn per logical line by the overlay so they stay aligned
+   with soft-wrapped lines and scale with editor zoom. The number sits in the
+   4rem (pl-16) gutter to the left of the text. */
+.editor-lines {
+  counter-reset: editor-line;
+}
+
+.editor-line {
+  position: relative;
+  counter-increment: editor-line;
+  min-height: 1.6em; /* keep empty lines one line tall */
+  min-height: 1lh;
+}
+
+.editor-line::before {
+  content: counter(editor-line);
+  position: absolute;
+  left: -4rem;
+  width: 2.5rem;
+  text-align: right;
+  color: var(--text-secondary);
+  opacity: 0.65;
 }
 
 /* Markdown preview styling - Enhanced typography */

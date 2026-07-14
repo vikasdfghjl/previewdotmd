@@ -118,9 +118,11 @@ const MarkdownPreview: React.FC = () => {
 
   // Layout configuration — single useMemo replaces 4 separate useCallbacks
   const layoutConfig = useMemo(() => ({
+    // Below lg, bottom padding reserves space for the docked layout-controls
+    // bar so it never covers the panel status bars.
     containerClass: fullscreen
       ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col'
-      : 'flex flex-col h-dvh w-full relative',
+      : 'flex flex-col h-dvh w-full relative pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0',
     mainClass: (readingMode || fullscreen || layoutMode === 'split')
       ? 'flex-1 flex overflow-hidden'
       : 'flex-1 flex flex-col overflow-hidden',
@@ -283,10 +285,16 @@ const MarkdownPreview: React.FC = () => {
         )}
       </main>
 
-      {/* Mobile layout controls */}
-      <div className="md:hidden fixed bottom-4 right-4 z-40 max-w-[calc(100vw-2rem)]">
-        <LayoutControls className="flex overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-1" />
-      </div>
+      {/* Mobile / tablet layout controls — docked bottom bar. The container's
+          bottom padding (see layoutConfig) reserves this space so the bar
+          never overlaps the editor/preview status bars. */}
+      {!fullscreen && (
+        <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)]">
+          <div className="overflow-x-auto">
+            <LayoutControls className="flex w-max mx-auto px-2 py-1" />
+          </div>
+        </div>
+      )}
 
       {/* Command Palette */}
       <CommandPalette

@@ -1,153 +1,64 @@
-# Future Scope
+# Future Scope (Pruned)
 
-This document outlines potential enhancements and features for the Markdown Preview application. These are ideas for future development, categorized by area of improvement.
+This file lists only features that are Not Implemented or Partially Implemented after a codebase review. Each item includes a short verification note and a file reference.
 
-## 1. File Operations
-- [x] **File Upload**: Drag-and-drop or file picker for `.md` files
-- [x] **Download**: Save current markdown as `.md` file
-- [x] **Export Options**: Export formatted preview as:
-  - [x] HTML document
-  - [x] PDF file
-  - [x] Plain text
+## Extended Markdown Support
 
-## 2. Editor Enhancements
-- [x] **Line Numbers**: Display line numbers in the editor
-- [x] **Syntax Highlighting**: Markdown syntax highlighting in editor
-- [x] **Find & Replace**: Search and replace functionality
-- [x] **Auto-save**: Automatic saving to localStorage
-- [x] **Bracket Matching**: Highlight matching brackets
+- **Footnotes — Not Implemented**: No remark-footnotes or equivalent plugin found in the markdown pipeline. See [src/lib/markdownPlugins.ts](src/lib/markdownPlugins.ts).
+- **Abbreviations — Not Implemented**: No abbreviation support detected in the current remark/rehype configuration. See [src/lib/markdownPlugins.ts](src/lib/markdownPlugins.ts).
 
-## 3. Extended Markdown Support
-- [x] **Math Equations**: KaTeX/LaTeX math rendering
-- [x] **Diagrams**: Mermaid.js integration for:
-  - [x] Flowcharts
-  - [x] Sequence diagrams
-  - [x] Gantt charts
-  - [x] Class diagrams
-- [x] **Emoji Support**: Convert emoji codes to actual emojis
-- [ ] **Footnotes**: Markdown footnotes support (disabled due to vfile compatibility)
-- [x] **Task Lists**: Interactive task list checkboxes (via remark-gfm)
-- [x] **Definition Lists**: Term-definition pairs
-- [ ] **Abbreviations**: Glossary-style abbreviations
+## Templates & Snippets
 
-## 4. View Options & Layout
-- [x] **Synchronized Scrolling**: Sync editor and preview scroll positions
-- [x] **Fullscreen Mode**: Distraction-free editing
-- [x] **Layout Options**:
-  - [x] Stacked (editor above preview)
-  - [x] Tabbed interface
-  - [x] Adjustable split ratios
-- [x] **Zoom Controls**: Zoom in/out of preview
-- [x] **Reading Mode**: Minimalist preview-only view
+- **Pre-built Templates (README, Docs, Blog, API) — Not Implemented**: No template library or example templates present. Consider creating a `/templates` directory and UI. (No specific file reference)
+- **Snippet Panel / Custom Templates / Quick Insert — Not Implemented**: No snippet manager or template save/load UI found.
 
-## 4. Templates & Snippets
-- [ ] **Pre-built Templates**:
-  - [ ] README template
-  - [ ] Documentation template
-  - [ ] Blog post template
-  - [ ] API documentation template
-- [ ] **Snippet Panel**: Common markdown patterns
-- [ ] **Custom Templates**: Save and load user templates
-- [ ] **Quick Insert**: Toolbar for common markdown elements
+## Accessibility & UX
 
-## 5. Accessibility & UX Improvements
-- [x] **Keyboard Shortcuts**:
-  - [x] Ctrl+B: Toggle bold
-  - [x] Ctrl+I: Toggle italic
-  - [x] Ctrl+K: Insert link
-  - [x] Ctrl+F: Find/Replace
-  - [ ] Ctrl+Shift+C: Copy HTML
-- [x] **Screen Reader Optimizations**: Better ARIA labels and roles
-- [x] **Customizable Font Sizes**: Adjustable text size in editor/preview (via zoom)
-- [x] **Color Themes**: Light/dark mode toggle
-- [ ] **Focus Mode**: Highlight current line/section
-- [x] **Distraction-free Mode**: Fullscreen and Reading Mode
-- [x] **WCAG 2.1 Compliance**: 44px touch targets, visible focus indicators, proper ARIA semantics
+- **Copy HTML to Clipboard (Ctrl+Shift+C) — Not Implemented**: No handler or command for copying rendered HTML found. See commands in [src/constants/commands.tsx](src/constants/commands.tsx) for existing commands.
+- **Focus Mode — Not Implemented**: UI to highlight current line/section not present.
 
-## 6. Performance & Technical
-- [ ] **Virtual Scrolling**: For handling very large documents
-- [ ] **Web Workers**: Offload markdown parsing to background threads
-- [x] **Service Worker**: Offline functionality & PWA support
-- [x] **PWA**: Installable app with manifest
-- [ ] **Performance Monitoring**: Track rendering performance
-- [ ] **Bundle Optimization**: Reduce initial load size
+## Performance & Technical
 
-## 7. Advanced Features
-- [ ] **Table of Contents**: Auto-generated TOC from headings
-- [x] **Word Count Analytics**: Basic statistics (characters, words, lines)
-- [ ] **Grammar Checking**: Integration with grammar tools
+- **Virtual Scrolling — Not Implemented**: No virtualization for very large documents detected.
+- **Web Workers — Not Implemented**: Markdown parsing not offloaded; no worker files or usage found.
+- **Performance Monitoring — Not Implemented**: No APM or performance metrics collection present.
+- **Bundle Optimization — Not Implemented**: Further bundle work is possible; no specialized optimization tooling in repo.
 
+## Preview Enhancements
 
-## 8. Editor Productivity
-- [x] **Column Selection**: Alt+Drag for column/rectangular selection
-- [x] **Auto-completion**: Markdown syntax suggestions
-- [x] **Smart Typing**: Auto-close brackets, quotes, and markdown pairs
-- [x] **Command Palette**: Quick access to all commands (Ctrl+Shift+P)
+- **Print Styles — Partially Implemented**: `exportAsPdf` injects `EXPORT_CSS` and an `@media print` rule into the printable template, but there is no dedicated site-wide print stylesheet. See [src/hooks/useFileOperations.ts](src/hooks/useFileOperations.ts) and [src/lib/download.ts](src/lib/download.ts).
+- **Responsive Preview — Not Implemented**: No device-size simulator in the preview pane.
+- **Custom CSS — Not Implemented**: No user-provided CSS injection UI discovered.
 
-## 9. Preview Enhancements
-- [x] **Scroll Sync Indicator**: Visual indicator showing sync status
-- [x] **Anchor Links**: Click heading to get shareable link to section
-- [x] **Image Lightbox**: Click images to enlarge
-- [ ] **Print Styles**: Optimized CSS for printing
-- [ ] **Responsive Preview**: Simulate mobile/tablet view
-- [ ] **Custom CSS**: User-defined styles for preview
+## Import/Export & Integration
 
-## 10. Import/Export & Integration
-- [ ] **Import from URL**: Fetch markdown from GitHub/GitLab raw URLs
-- [ ] **Notion Integration**: Import/export with Notion pages
-- [ ] **Obsidian Integration**: Work with Obsidian vaults
-- [ ] **Word Export**: Export to .docx format
-- [ ] **Image Upload**: Drag images to upload to CDN (Imgur, Cloudinary)
-- [ ] **Embed External Content**: oEmbed support for YouTube, Twitter, etc.
+- **Import from URL — Not Implemented**: No fetch/import-from-URL feature found.
+- **Notion / Obsidian Integration — Not Implemented**: No connectors or exporters detected.
+- **Word Export (.docx) — Not Implemented**: No docx export library integration found.
+- **Image Upload to CDN — Partially Implemented**: Drag-and-drop image insertion exists (see [src/components/EditorPanel.tsx](src/components/EditorPanel.tsx)), but automatic upload to a CDN (Imgur/Cloudinary) is not implemented.
+- **Embed External Content (oEmbed) — Not Implemented**: No oEmbed handling was found.
 
-## 11. Security & Privacy
-- [ ] **Content Security Policy**: Strict CSP headers
-- [ ] **XSS Prevention**: Sanitize untrusted markdown
-- [ ] **Local-Only Mode**: No external requests option
-- [ ] **Encrypted Storage**: Password-protected documents
-- [ ] **Session Timeout**: Auto-lock after inactivity
+## Security & Privacy
 
-## Implementation Priorities
+- **Content Security Policy — Not Implemented**: No CSP enforcement found in app config or headers.
+- **XSS Prevention / Sanitization — Partially Implemented / Needs Review**: Several components render HTML via `dangerouslySetInnerHTML` (e.g. [src/components/MermaidRenderer.tsx](src/components/MermaidRenderer.tsx), [src/components/SyntaxHighlightOverlay.tsx](src/components/SyntaxHighlightOverlay.tsx), [src/app/layout.tsx](src/app/layout.tsx)). A repo-wide sanitizer (DOMPurify or similar) was not detected — this is a security risk that should be addressed.
+- **Local-Only Mode / Encrypted Storage / Session Timeout — Not Implemented**: Privacy-oriented features not present.
 
-### High Priority (Core Functionality)
-1. [x] File upload/download
-2. [x] Line numbers in editor
-3. [x] Auto-save functionality
-4. [x] Keyboard shortcuts
-5. [x] Accessibility compliance (WCAG 2.1)
+## Advanced Features & Tools
 
-### Medium Priority (Enhanced Experience)
-1. [x] Synchronized scrolling
-2. [x] Export to HTML/PDF
-3. [x] Math equation support
-4. [x] Multiple layout options
-5. [ ] Table of Contents
-6. [ ] Copy HTML to clipboard
-7. [ ] Templates & Snippets
+- **Table of Contents — Implemented (removed)**: TOC component exists; not listed here. See [src/components/TableOfContents.tsx](src/components/TableOfContents.tsx).
+- **Grammar Checking — Not Implemented**: No grammar tool integration (LanguageTool, Grammarly API) detected.
 
-### Low Priority (Advanced Features)
-1. [ ] Real-time collaboration
-2. [ ] Mobile app
-3. [ ] Browser extension
-4. [ ] Cloud storage integration
-5. [ ] Grammar checking
-6. [ ] Presentation mode
+## Notes & Next Steps
 
-## Contributing
+- If you want, I can:
+  - open PR to add simple sanitization (DOMPurify) around rendered HTML,
+  - implement a basic Copy-HTML command,
+  - scaffold template/snippet storage and UI,
+  - or restore any removed FUTURE items for discussion.
 
-If you'd like to contribute to any of these features, please:
-1. Check the issue tracker for existing discussions
-2. Create a new issue for the feature you want to implement
-3. Follow the project's coding standards
-4. Submit a pull request with your implementation
+## Housekeeping
 
-## Notes
+- `.gitignore` was updated to include local/editor/tooling artifacts (including `.claude/`). If `.claude` was already committed, run `git rm -r --cached .claude` and commit to stop tracking it.
 
-- Features marked with (*) require external libraries or APIs
-- Some features may require significant architectural changes
-- Performance considerations should be evaluated for each feature
-- User feedback will help prioritize which features to implement first
-
----
-
-*Last updated: April 2, 2026*
+_Last reviewed: July 9, 2026_
