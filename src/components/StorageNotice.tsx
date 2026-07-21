@@ -22,7 +22,9 @@ export const StorageNotice: React.FC = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!wasDismissed()) setVisible(true);
+    if (!wasDismissed()) {
+      requestAnimationFrame(() => setVisible(true));
+    }
   }, []);
 
   if (!visible) return null;

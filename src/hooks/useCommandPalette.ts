@@ -87,7 +87,7 @@ export function useCommandPalette({ commands }: { commands: Command[] }) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl+Shift+P or Cmd+Shift+P
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'P') {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'p') {
         e.preventDefault();
         toggle();
       }

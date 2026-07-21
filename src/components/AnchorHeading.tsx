@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Icons } from '@/constants/icons';
+import { slugify } from '@/lib/slugify';
 
 interface AnchorHeadingProps {
   level: 1 | 2 | 3 | 4 | 5 | 6;
@@ -25,15 +26,6 @@ export const AnchorHeading: React.FC<AnchorHeadingProps> = ({
   id: providedId,
 }) => {
   const [showCopied, setShowCopied] = useState(false);
-  
-  // Generate ID from children text if not provided
-  const generateId = (text: string): string => {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .substring(0, 50);
-  };
 
   // Extract text from children for ID generation
   const extractText = (node: React.ReactNode): string => {
@@ -49,7 +41,7 @@ export const AnchorHeading: React.FC<AnchorHeadingProps> = ({
   };
 
   const headingText = extractText(children);
-  const id = providedId || generateId(headingText);
+  const id = providedId || slugify(headingText);
 
   const handleClick = async () => {
     const url = `${window.location.origin}${window.location.pathname}#${id}`;

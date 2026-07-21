@@ -93,10 +93,27 @@ export function useSmartTyping(
       return true;
     }
 
-    // Handle Tab key for indentation
+    // Handle Tab and Shift+Tab key for indentation / un-indentation
     if (key === 'Tab') {
       e.preventDefault();
       
+      if (e.shiftKey) {
+        // Un-indent selected lines or current line
+        const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+        const targetEnd = hasSelection ? end : start;
+        const textToUnindent = value.substring(lineStart, targetEnd);
+        const lines = textToUnindent.split('\n');
+        const unindentedLines = lines.map(line => line.replace(/^(  | )/, ''));
+        const newText = unindentedLines.join('\n');
+        const newValue = value.substring(0, lineStart) + newText + value.substring(targetEnd);
+        
+        textarea.value = newValue;
+        const newCursorEnd = lineStart + newText.length;
+        textarea.setSelectionRange(hasSelection ? lineStart : Math.max(lineStart, start - 2), newCursorEnd);
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+        return true;
+      }
+
       if (hasSelection) {
         // Indent multiple lines
         const selectedText = value.substring(start, end);

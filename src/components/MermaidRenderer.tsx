@@ -47,7 +47,7 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
         const mermaid = await loadMermaid();
         if (cancelled) return;
 
-        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
+        const id = `mermaid-${Math.random().toString(36).slice(2, 11)}`;
         const { svg: renderedSvg } = await mermaid.render(id, chart.trim());
         // Mermaid emits width="100%" capped by a natural-size max-width,
         // which scales wide diagrams down to the container — unreadably

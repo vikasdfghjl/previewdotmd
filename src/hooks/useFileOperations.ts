@@ -15,7 +15,8 @@ export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperati
   }, [markdown]);
 
   const handleFileUpload = useCallback((file: File) => {
-    if (!file.name.endsWith('.md') && !file.name.endsWith('.markdown')) {
+    const fileNameLower = file.name.toLowerCase();
+    if (!fileNameLower.endsWith('.md') && !fileNameLower.endsWith('.markdown')) {
       alert('Please upload a markdown file (.md or .markdown)');
       return;
     }
@@ -43,7 +44,10 @@ export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperati
 
     const files = Array.from(e.dataTransfer.files);
     const mdFile = files.find(
-      file => file.name.endsWith('.md') || file.name.endsWith('.markdown')
+      file => {
+        const nameLower = file.name.toLowerCase();
+        return nameLower.endsWith('.md') || nameLower.endsWith('.markdown');
+      }
     );
 
     if (mdFile) {
@@ -53,11 +57,22 @@ export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperati
     }
   }, [handleFileUpload]);
 
+  const getRenderedHtml = useCallback((): string => {
+    if (typeof window !== 'undefined') {
+      const area = document.getElementById('preview-render-area');
+      if (area && area.innerHTML.trim() !== '') {
+        return area.innerHTML;
+      }
+    }
+    return `<pre>${markdownRef.current.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+  }, []);
+
   const downloadMarkdown = useCallback(() => {
     triggerDownload(markdownRef.current, 'document.md', 'text/markdown');
   }, []);
 
   const exportAsHtml = useCallback(() => {
+    const bodyContent = getRenderedHtml();
     const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,17 +82,18 @@ export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperati
   <style>${EXPORT_CSS}</style>
 </head>
 <body>
-${markdownRef.current}
+${bodyContent}
 </body>
 </html>`;
     triggerDownload(htmlContent, 'document.html', 'text/html');
-  }, []);
+  }, [getRenderedHtml]);
 
   const exportAsPlainText = useCallback(() => {
     triggerDownload(markdownRef.current, 'document.txt', 'text/plain');
   }, []);
 
   const exportAsPdf = useCallback(() => {
+    const bodyContent = getRenderedHtml();
     const printWindow = window.open('', '_blank');
     if (printWindow) {
       printWindow.document.write(`<!DOCTYPE html>
@@ -87,13 +103,13 @@ ${markdownRef.current}
   <style>${EXPORT_CSS} @media print { body { padding: 0; } }</style>
 </head>
 <body>
-  ${markdownRef.current}
+  ${bodyContent}
   <script>window.onload = function() { window.print(); };</script>
 </body>
 </html>`);
       printWindow.document.close();
     }
-  }, []);
+  }, [getRenderedHtml]);
 
   return {
     fileInputRef,

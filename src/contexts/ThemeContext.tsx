@@ -18,36 +18,64 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
-    // Initialize from localStorage or system preference (only runs once)
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as Theme | null;
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      
-      if (savedTheme) return savedTheme;
-      if (systemPrefersDark) return 'dark';
-      return 'light';
+      try {
+        const savedTheme = localStorage.getItem('theme') as Theme | null;
+        if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return systemPrefersDark ? 'dark' : 'light';
+      } catch {
+        return 'light';
+      }
     }
     return 'light';
   });
 
-  // Apply theme to document and save to localStorage when theme changes
+  // Apply theme to document element and persist choice
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    localStorage.setItem('theme', theme);
+    try {
+      localStorage.setItem('theme', theme);
+    } catch {
+      // Storage full or unavailable
+    }
   }, [theme]);
 
-  const toggleTheme = () => {
-    setThemeState(prev => (prev === 'light' ? 'dark' : 'light'));
-  };
+  // Listen to system theme preference changes when no explicit choice stored
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+      try {
+        if (!localStorage.getItem('theme')) {
+          setThemeState(e.matches ? 'dark' : 'light');
+        }
+      } catch {
+        setThemeState(e.matches ? 'dark' : 'light');
+      }
+    };
 
-  const setTheme = (newTheme: Theme) => {
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+    return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
+  }, []);
+
+  const toggleTheme = React.useCallback(() => {
+    setThemeState(prev => (prev === 'light' ? 'dark' : 'light'));
+  }, []);
+
+  const setTheme = React.useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
-  };
+  }, []);
+
+  const value = React.useMemo(
+    () => ({ theme, toggleTheme, setTheme }),
+    [theme, toggleTheme, setTheme]
+  );
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );

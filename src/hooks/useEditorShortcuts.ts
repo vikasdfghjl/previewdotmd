@@ -15,7 +15,9 @@ export function useEditorShortcuts({
   onOpenFindReplace,
 }: UseEditorShortcutOptions) {
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    const key = e.key.toLowerCase();
+
+    if ((e.ctrlKey || e.metaKey) && key === 'f') {
       e.preventDefault();
       onOpenFindReplace();
       return;
@@ -31,7 +33,7 @@ export function useEditorShortcuts({
       const end = textarea.selectionEnd;
       const selectedText = markdown.slice(start, end);
 
-      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+      if ((e.ctrlKey || e.metaKey) && key === 'b') {
         e.preventDefault();
         const wrapped = `**${selectedText}**`;
         onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
@@ -40,7 +42,7 @@ export function useEditorShortcuts({
         }, 0);
       }
 
-      if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+      if ((e.ctrlKey || e.metaKey) && key === 'i') {
         e.preventDefault();
         const wrapped = `*${selectedText}*`;
         onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
@@ -49,13 +51,13 @@ export function useEditorShortcuts({
         }, 0);
       }
 
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && key === 'k') {
         e.preventDefault();
         const wrapped = `[${selectedText}](url)`;
         onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
         setTimeout(() => {
           if (selectedText) {
-            textarea.setSelectionRange(start + wrapped.length - 1, start + wrapped.length - 4);
+            textarea.setSelectionRange(start + wrapped.length - 4, start + wrapped.length - 1);
           } else {
             textarea.setSelectionRange(start + 1, end + 1);
           }

@@ -104,14 +104,16 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
       ? 'tabbed'
       : prefs?.layoutMode ?? DEFAULT_STATE.layoutMode;
 
-    setState(prev => ({
-      ...prev,
-      layoutMode: initialMode,
-      syncScroll: prefs?.syncScroll ?? prev.syncScroll,
-      zoomLevel: prefs?.zoomLevel ?? prev.zoomLevel,
-    }));
-    if (prefs?.editorWidth !== undefined) setEditorWidthState(prefs.editorWidth);
-    prefsLoadedRef.current = true;
+    requestAnimationFrame(() => {
+      setState(prev => ({
+        ...prev,
+        layoutMode: initialMode,
+        syncScroll: prefs?.syncScroll ?? prev.syncScroll,
+        zoomLevel: prefs?.zoomLevel ?? prev.zoomLevel,
+      }));
+      if (prefs?.editorWidth !== undefined) setEditorWidthState(prefs.editorWidth);
+      prefsLoadedRef.current = true;
+    });
 
     // Rotation / window resize across the breakpoint re-picks the mode,
     // unless the user explicitly chose one this session.
@@ -164,8 +166,8 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     userChoseLayoutRef.current = false;
     try {
       localStorage.removeItem(PREFS_KEY);
-    } catch {
-      // storage unavailable — non-fatal
+    } catch (err) {
+      console.warn('[LayoutContext] Unable to clear layout preferences from storage:', err);
     }
     setState(DEFAULT_STATE);
     setEditorWidthState(DEFAULT_EDITOR_WIDTH);

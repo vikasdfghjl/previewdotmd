@@ -16,13 +16,10 @@ export function ServiceWorkerRegistration() {
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
-    let swRegistration: ServiceWorkerRegistration | null = null;
-
     const register = () => {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          swRegistration = registration;
           console.log('[PWA] Service Worker registered:', registration.scope);
 
           // Check if an update was already found while registering

@@ -100,7 +100,7 @@ export function useAutoComplete(
     // If insertText contains 'text' or 'code', place cursor there
     const textMatch = insertText.match(/(text|code|url|alt|Header|Cell)/);
     if (textMatch) {
-      cursorOffset = textMatch.index || insertText.length;
+      cursorOffset = textMatch.index ?? insertText.length;
       insertText = insertText.replace(/text|code|url|alt|Header|Cell/g, (match) => {
         if (match === 'Header' || match === 'Cell') return match.toLowerCase();
         return '';

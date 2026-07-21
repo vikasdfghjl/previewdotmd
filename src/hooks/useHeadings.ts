@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { slugify } from '@/lib/slugify';
 
 export interface HeadingEntry {
   id: string;
@@ -29,11 +30,7 @@ export function useHeadings(markdown: string): HeadingEntry[] {
       if (match) {
         const level = match[1].length;
         const text = match[2].trim();
-        const id = text
-          .toLowerCase()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .substring(0, 50);
+        const id = slugify(text);
         headings.push({ id, text, level });
       }
     }

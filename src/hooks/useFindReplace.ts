@@ -15,6 +15,7 @@ export function useFindReplace({
   const [matchCount, setMatchCount] = useState(0);
   const [currentMatch, setCurrentMatch] = useState(0);
   const matchesRef = useRef<number[]>([]);
+  const queryLengthRef = useRef<number>(0);
 
   const open = useCallback(() => setIsOpen(true), []);
   const close = useCallback(() => setIsOpen(false), []);
@@ -23,6 +24,7 @@ export function useFindReplace({
   const handleFind = useCallback((query: string) => {
     if (!query) {
       matchesRef.current = [];
+      queryLengthRef.current = 0;
       setMatchCount(0);
       setCurrentMatch(0);
       return;
@@ -39,6 +41,7 @@ export function useFindReplace({
     }
 
     matchesRef.current = foundMatches;
+    queryLengthRef.current = query.length;
     setMatchCount(foundMatches.length);
     setCurrentMatch(foundMatches.length > 0 ? 1 : 0);
   }, [markdown]);
@@ -50,6 +53,7 @@ export function useFindReplace({
       const regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
       onChange(markdown.replace(regex, replacement));
       matchesRef.current = [];
+      queryLengthRef.current = 0;
       setMatchCount(0);
       setCurrentMatch(0);
     } else if (matchesRef.current.length > 0 && currentMatch > 0) {
@@ -65,7 +69,8 @@ export function useFindReplace({
     const nextMatch = currentMatch >= matches.length ? 1 : currentMatch + 1;
     setCurrentMatch(nextMatch);
     if (textareaRef.current) {
-      textareaRef.current.setSelectionRange(matches[nextMatch - 1], matches[nextMatch - 1] + 1);
+      const matchLen = queryLengthRef.current || 1;
+      textareaRef.current.setSelectionRange(matches[nextMatch - 1], matches[nextMatch - 1] + matchLen);
       textareaRef.current.focus();
     }
   }, [currentMatch, textareaRef]);
@@ -76,7 +81,8 @@ export function useFindReplace({
     const prevMatch = currentMatch <= 1 ? matches.length : currentMatch - 1;
     setCurrentMatch(prevMatch);
     if (textareaRef.current) {
-      textareaRef.current.setSelectionRange(matches[prevMatch - 1], matches[prevMatch - 1] + 1);
+      const matchLen = queryLengthRef.current || 1;
+      textareaRef.current.setSelectionRange(matches[prevMatch - 1], matches[prevMatch - 1] + matchLen);
       textareaRef.current.focus();
     }
   }, [currentMatch, textareaRef]);

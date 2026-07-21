@@ -171,6 +171,7 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
           className="flex-1 overflow-auto"
         >
           <div
+            id="preview-render-area"
             className="p-6 max-w-none"
             style={{ fontSize: `${zoomLevel}%` }}
           >

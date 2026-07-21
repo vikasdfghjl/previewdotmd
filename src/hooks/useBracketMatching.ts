@@ -48,10 +48,16 @@ export function useBracketMatching(content: string) {
           const expectedOpen = char === ')' ? '(' : char === ']' ? '[' : '{';
           const type = char === ')' ? 'round' : char === ']' ? 'square' : 'curly';
 
-          // Find matching opening bracket
-          const matchingIndex = stack.findIndex(item => item.char === expectedOpen);
+          // Find matching opening bracket (innermost/LIFO)
+          let matchingIndex = -1;
+          for (let i = stack.length - 1; i >= 0; i--) {
+            if (stack[i].char === expectedOpen) {
+              matchingIndex = i;
+              break;
+            }
+          }
+
           if (matchingIndex !== -1) {
-            // Remove all brackets after the matching one (they're unmatched)
             const openBracket = stack[matchingIndex];
             foundMatches.push({
               open: { line: openBracket.line, column: openBracket.column },

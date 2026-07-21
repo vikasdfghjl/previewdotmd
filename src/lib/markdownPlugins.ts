@@ -51,11 +51,6 @@ export function buildRemarkPlugins(config: MarkdownPluginConfig = defaultPluginC
     plugins.push(remarkEmoji);
   }
 
-  // Footnotes disabled due to vfile version incompatibility
-  // if (config.footnotes) {
-  //   plugins.push([remarkFootnotes, { inlineNotes: true }]);
-  // }
-
   if (config.deflist) {
     plugins.push(remarkDeflist);
   }
