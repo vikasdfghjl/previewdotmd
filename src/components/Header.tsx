@@ -28,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <h1 className="text-xl font-bold text-primary tracking-tight">
             Preview<span className="text-blue-500">.md</span>
+            <span className="sr-only"> — Free online Markdown editor with live preview, syntax highlighting, Mermaid diagrams, and KaTeX math</span>
           </h1>
         </div>
       </div>
