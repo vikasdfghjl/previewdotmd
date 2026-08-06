@@ -100,7 +100,7 @@ ${bodyContent}
 <html>
 <head>
   <title>Markdown Export - PDF</title>
-  <style>${EXPORT_CSS} @media print { body { padding: 0; } }</style>
+  <style>${EXPORT_CSS}</style>
 </head>
 <body>
   ${bodyContent}

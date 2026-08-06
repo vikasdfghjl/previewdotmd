@@ -86,9 +86,9 @@ export const AnchorHeading: React.FC<AnchorHeadingProps> = ({
     >
       {children}
       
-      {/* Anchor link icon - visible on hover */}
+      {/* Anchor link icon - visible on hover; hidden in HTML/PDF export (see EXPORT_CSS) since it depends on Tailwind styling that exports don't include */}
       <span
-        className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 flex items-center justify-center w-6 h-6 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+        className="anchor-heading-icon opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 flex items-center justify-center w-6 h-6 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
         aria-hidden="true"
       >
         {Icons.link}

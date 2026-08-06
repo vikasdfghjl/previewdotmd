@@ -59,4 +59,55 @@ export const EXPORT_CSS = `
   img {
     max-width: 100%;
   }
+  .anchor-heading-icon {
+    display: none;
+  }
+  .code-copy-button {
+    display: none;
+  }
+
+  /* Print / PDF: fit A4 and never rely on scrolling to reveal clipped content */
+  @media print {
+    @page {
+      size: A4;
+      margin: 15mm;
+    }
+    body {
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      page-break-after: avoid;
+    }
+    pre, table, .mermaid-diagram-container {
+      page-break-inside: avoid;
+    }
+    pre, code {
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      overflow-x: visible;
+    }
+    table {
+      font-size: 0.85em;
+    }
+    td, th {
+      overflow-wrap: break-word;
+    }
+    img, svg {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+    /* Diagrams are given natural (unconstrained) width for horizontal scrolling
+       in the live preview and standalone HTML export — but print can't scroll,
+       so shrink wide diagrams to fit the page instead of clipping them. */
+    .mermaid-diagram-container {
+      overflow: visible !important;
+    }
+    .mermaid-diagram-container svg {
+      width: auto !important;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+  }
 `;

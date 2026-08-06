@@ -108,7 +108,7 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
   return (
     <div
       ref={containerRef}
-      className="my-4 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-auto"
+      className="mermaid-diagram-container my-4 p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 overflow-auto"
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );

@@ -65,10 +65,10 @@ export const CodeRenderer = React.memo<CodeRendererProps>(({
             </span>
           </div>
 
-          {/* Copy button */}
+          {/* Copy button - hidden in HTML/PDF export (see EXPORT_CSS) since it's non-functional there and depends on Tailwind styling that exports don't include */}
           <button
             onClick={handleCopy}
-            className="btn px-3 py-2 min-h-[44px] text-xs rounded-md flex items-center gap-1.5 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+            className="code-copy-button btn px-3 py-2 min-h-[44px] text-xs rounded-md flex items-center gap-1.5 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             title={copied ? 'Copied!' : 'Copy code'}
             aria-label={copied ? `Code copied to clipboard. ${language} language` : `Copy ${language} code to clipboard`}
             aria-live="polite"
