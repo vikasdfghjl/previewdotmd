@@ -1,23 +1,24 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface MermaidRendererProps {
   chart: string;
 }
 
-let mermaidInitialized = false;
+let mermaidInitializedTheme: 'light' | 'dark' | null = null;
 
-async function loadMermaid() {
+async function loadMermaid(theme: 'light' | 'dark') {
   const mermaid = (await import('mermaid')).default;
-  if (!mermaidInitialized) {
+  if (mermaidInitializedTheme !== theme) {
     mermaid.initialize({
       startOnLoad: false,
-      theme: 'default',
+      theme: theme === 'dark' ? 'dark' : 'default',
       securityLevel: 'strict',
       fontFamily: 'inherit',
     });
-    mermaidInitialized = true;
+    mermaidInitializedTheme = theme;
   }
   return mermaid;
 }
@@ -33,8 +34,10 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
   const [svg, setSvg] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { theme } = useTheme();
 
-  // Render the diagram via dynamic import
+  // Render the diagram via dynamic import. Re-renders when the theme changes
+  // since Mermaid bakes colors into the SVG at render time.
   useEffect(() => {
     if (!chart.trim()) return;
 
@@ -44,7 +47,7 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
 
     const renderDiagram = async () => {
       try {
-        const mermaid = await loadMermaid();
+        const mermaid = await loadMermaid(theme);
         if (cancelled) return;
 
         const id = `mermaid-${Math.random().toString(36).slice(2, 11)}`;
@@ -70,7 +73,7 @@ export const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
     renderDiagram();
 
     return () => { cancelled = true; };
-  }, [chart]);
+  }, [chart, theme]);
 
   if (isLoading) {
     return (

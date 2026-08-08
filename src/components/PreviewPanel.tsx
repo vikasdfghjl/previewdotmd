@@ -161,8 +161,9 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
         }
         onToggle={onToggle}
         isHidden={!isVisible}
+        showSubtitle={false}
       />
-      
+
       {/* Preview container with TOC sidebar */}
       <div className="flex flex-1 min-h-0">
         <div

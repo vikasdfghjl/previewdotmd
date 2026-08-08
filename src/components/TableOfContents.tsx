@@ -87,7 +87,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
       {/* Main panel — visible when open */}
       {isOpen && (
-        <div className="hidden lg:block w-48 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/20 overflow-y-auto relative">
+        <div className="hidden lg:block w-64 flex-shrink-0 border-l border-gray-200 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-800/20 overflow-y-auto relative">
           <div className="sticky top-0 px-3 py-3">
             {/* Header row */}
             <div className="flex items-center justify-between mb-2">

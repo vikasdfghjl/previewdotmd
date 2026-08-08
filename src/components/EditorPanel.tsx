@@ -271,6 +271,7 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
         actions={actions}
         onToggle={onToggle}
         isHidden={!isVisible}
+        showTitle={false}
       />
 
       <input ref={fileInputRef} type="file" accept=".md,.markdown" onChange={handleFileSelect} className="hidden" />
@@ -281,23 +282,25 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
         onChange={onChange}
       />
 
+      {/* Docked in normal flow (not an overlay) so it pushes the editor down
+          instead of covering the very matches it's helping you find. */}
+      <FindReplace
+        isOpen={findReplaceOpen}
+        onClose={closeFindReplace}
+        onFind={handleFind}
+        onReplace={handleReplace}
+        matchCount={matchCount}
+        currentMatch={currentMatch}
+        onNext={goToNextMatch}
+        onPrev={goToPrevMatch}
+      />
+
       <div
         className="flex-1 relative overflow-hidden"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <FindReplace
-          isOpen={findReplaceOpen}
-          onClose={closeFindReplace}
-          onFind={handleFind}
-          onReplace={handleReplace}
-          matchCount={matchCount}
-          currentMatch={currentMatch}
-          onNext={goToNextMatch}
-          onPrev={goToPrevMatch}
-        />
-
         {/* Shared scroll container — the overlay (visible text + line numbers)
             defines the content height and the textarea stretches over it, so
             one scrollbar serves both layers and they can never drift apart. */}
@@ -417,7 +420,7 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
             </span>
           )}
         </div>
-        <div className="text-xs text-secondary opacity-60">Tab size: 2 spaces</div>
+        <div className="text-xs text-secondary">Tab size: 2 spaces</div>
       </div>
 
       <ConfirmDialog

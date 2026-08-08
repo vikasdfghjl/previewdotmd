@@ -16,41 +16,24 @@ export const DarkModeToggle: React.FC = () => {
   const mounted = useIsMounted();
   const isDark = theme === 'dark';
 
-  // Server-rendered base: no theme-dependent styles to avoid hydration mismatch
-  const background = mounted
-    ? (isDark ? 'linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)')
-    : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
-
-  const boxShadow = mounted
-    ? (isDark ? '0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)' : '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)')
-    : '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)';
-
-  const glowBackground = mounted
-    ? (isDark ? 'radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)' : 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%)')
-    : 'radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%)';
-
   return (
     <button
       onClick={toggleTheme}
-      className="relative p-2.5 rounded-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-800"
-      style={{
-        background,
-        boxShadow,
-      }}
+      className="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
       aria-label={`Switch to ${mounted && isDark ? 'light' : 'dark'} mode`}
       title={`Switch to ${mounted && isDark ? 'light' : 'dark'} mode`}
     >
-      <div className="relative w-6 h-6 overflow-hidden">
+      <div className="relative w-5 h-5 overflow-hidden">
         {/* Sun Icon (Light Mode) */}
         <div
           className={`absolute inset-0 transform transition-all duration-500 ease-out ${
-            mounted && isDark 
-              ? 'rotate-90 scale-0 opacity-0' 
+            mounted && isDark
+              ? 'rotate-90 scale-0 opacity-0'
               : 'rotate-0 scale-100 opacity-100'
           }`}
         >
           <svg
-            className="w-6 h-6 text-amber-500 drop-shadow-sm"
+            className="w-5 h-5 text-secondary"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -61,17 +44,17 @@ export const DarkModeToggle: React.FC = () => {
             />
           </svg>
         </div>
-        
+
         {/* Moon Icon (Dark Mode) */}
         <div
           className={`absolute inset-0 transform transition-all duration-500 ease-out ${
-            mounted && isDark 
-              ? 'rotate-0 scale-100 opacity-100' 
+            mounted && isDark
+              ? 'rotate-0 scale-100 opacity-100'
               : '-rotate-90 scale-0 opacity-0'
           }`}
         >
           <svg
-            className="w-6 h-6 text-indigo-300 drop-shadow-sm"
+            className="w-5 h-5 text-secondary"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
@@ -83,16 +66,6 @@ export const DarkModeToggle: React.FC = () => {
           </svg>
         </div>
       </div>
-      
-      {/* Glow effect on hover */}
-      <div
-        className={`absolute inset-0 rounded-xl transition-opacity duration-300 ${
-          isDark ? 'opacity-0 hover:opacity-100' : 'opacity-0 hover:opacity-100'
-        }`}
-        style={{
-          background: glowBackground,
-        }}
-      />
     </button>
   );
 };

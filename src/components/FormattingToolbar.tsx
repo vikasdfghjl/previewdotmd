@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ToolbarButton } from './ToolbarButton';
 
 interface FormattingToolbarProps {
@@ -245,22 +245,64 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
     [textareaRef, markdown, onChange],
   );
 
+  // Track whether the toolbar has hidden content to either side so we can
+  // show a fade hint — on narrow screens not all buttons fit and there's
+  // otherwise no visual cue that the row scrolls horizontally.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollShadows = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 1);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateScrollShadows();
+    el.addEventListener('scroll', updateScrollShadows, { passive: true });
+    const observer = new ResizeObserver(updateScrollShadows);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener('scroll', updateScrollShadows);
+      observer.disconnect();
+    };
+  }, [updateScrollShadows]);
+
   return (
-    <div
-      className="flex items-center gap-0.5 px-2 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/50 overflow-x-auto flex-shrink-0"
-      role="toolbar"
-      aria-label="Markdown formatting"
-    >
-      {TOOLBAR_ACTIONS.map((item) => (
-        <ToolbarButton
-          key={item.label}
-          size="sm"
-          onClick={() => handleAction(item.action)}
-          title={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
-        >
-          {item.icon}
-        </ToolbarButton>
-      ))}
+    <div className="relative flex-shrink-0">
+      <div
+        ref={scrollRef}
+        className="flex items-center gap-0.5 px-2 py-1.5 border-b border-gray-200 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/50 overflow-x-auto"
+        role="toolbar"
+        aria-label="Markdown formatting"
+      >
+        {TOOLBAR_ACTIONS.map((item) => (
+          <ToolbarButton
+            key={item.label}
+            size="sm"
+            onClick={() => handleAction(item.action)}
+            title={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
+          >
+            {item.icon}
+          </ToolbarButton>
+        ))}
+      </div>
+      {canScrollLeft && (
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-gray-50 dark:from-gray-800 to-transparent"
+          aria-hidden="true"
+        />
+      )}
+      {canScrollRight && (
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-gray-50 dark:from-gray-800 to-transparent"
+          aria-hidden="true"
+        />
+      )}
     </div>
   );
 };

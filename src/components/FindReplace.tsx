@@ -53,9 +53,9 @@ export const FindReplace: React.FC<FindReplaceProps> = ({
 
   return (
     <div
-      className="absolute top-0 right-0 z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3 w-80 max-w-[calc(100%-1rem)]"
+      className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm p-3"
       role="dialog"
-      aria-modal="true"
+      aria-modal="false"
       aria-labelledby="find-dialog-title"
     >
       <h2 id="find-dialog-title" className="sr-only">Find and Replace</h2>

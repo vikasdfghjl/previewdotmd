@@ -7,6 +7,10 @@ interface PanelHeaderProps {
   actions?: React.ReactNode;
   onToggle?: () => void;
   isHidden?: boolean;
+  /** Hides the visible title text next to the icon; `title` is still used for the toggle button's tooltip/aria-label. */
+  showTitle?: boolean;
+  /** Hides the visible subtitle text on the right side of the header. */
+  showSubtitle?: boolean;
 }
 
 export const PanelHeader: React.FC<PanelHeaderProps> = ({
@@ -16,17 +20,21 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
   actions,
   onToggle,
   isHidden = false,
+  showTitle = true,
+  showSubtitle = true,
 }) => {
   return (
     <div className="panel-header flex items-center justify-between px-5 py-3 border-b">
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 flex items-center justify-center text-secondary">
-            {icon}
+        {showTitle && (
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 flex items-center justify-center text-secondary">
+              {icon}
+            </div>
+            <h2 className="text-sm font-semibold text-primary tracking-wide">{title}</h2>
           </div>
-          <h2 className="text-sm font-semibold text-primary tracking-wide">{title}</h2>
-        </div>
-        
+        )}
+
         {onToggle && (
           <button
             onClick={onToggle}
@@ -54,9 +62,11 @@ export const PanelHeader: React.FC<PanelHeaderProps> = ({
           </div>
         )}
         
-        <span className="text-xs font-medium text-secondary opacity-75 hidden sm:inline">
-          {subtitle}
-        </span>
+        {showSubtitle && (
+          <span className="text-xs font-medium text-secondary opacity-75 hidden sm:inline">
+            {subtitle}
+          </span>
+        )}
       </div>
     </div>
   );
