@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useCallback, useRef, useEffect, useMemo } from 'react';
+import React, { useCallback, useRef, useEffect, useMemo, useState } from 'react';
 import { useMarkdownState } from '@/hooks/useMarkdownState';
 import { useFileOperations } from '@/hooks/useFileOperations';
 import { useLayout } from '@/contexts/LayoutContext';
 import { useCommandPalette } from '@/hooks/useCommandPalette';
+import { OnboardingHintProvider } from '@/contexts/OnboardingHintContext';
 import { EditorPanel, EditorPanelRef } from './EditorPanel';
 import { PreviewPanel, PreviewPanelRef } from './PreviewPanel';
 import { LayoutControls } from './LayoutControls';
@@ -39,6 +40,8 @@ const MarkdownPreview: React.FC = () => {
 
   const {
     handleFileUpload,
+    uploadError,
+    dismissUploadError,
     downloadMarkdown,
     exportAsHtml,
     exportAsPdf,
@@ -83,6 +86,21 @@ const MarkdownPreview: React.FC = () => {
     close: closeCommandPalette,
     open: openCommandPalette,
   } = useCommandPalette({ commands });
+
+  // Tracks whether the palette has ever been opened, so the onboarding hint
+  // in Header dismisses itself once the user finds the feature on their own.
+  const [hasOpenedCommandPalette, setHasOpenedCommandPalette] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-way ratchet on a prop, not derivable at render time
+    if (commandPaletteOpen) setHasOpenedCommandPalette(true);
+  }, [commandPaletteOpen]);
+
+  // Same ratchet, for the sync-scroll onboarding hint.
+  const [hasToggledSyncScroll, setHasToggledSyncScroll] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-way ratchet on a prop, not derivable at render time
+    if (syncScroll) setHasToggledSyncScroll(true);
+  }, [syncScroll]);
 
   // Sync scroll handlers
   const handleEditorScroll = useCallback((percentage: number) => {
@@ -131,12 +149,15 @@ const MarkdownPreview: React.FC = () => {
   }), [readingMode, fullscreen, layoutMode, editorWidth]);
 
   return (
+    <OnboardingHintProvider>
     <div className={layoutConfig.containerClass}>
       {/* Header - hidden in fullscreen */}
       {!fullscreen && (
         <Header
           githubUrl={APP_CONFIG.github.url}
           onOpenCommandPalette={openCommandPalette}
+          hasOpenedCommandPalette={hasOpenedCommandPalette}
+          hasToggledSyncScroll={hasToggledSyncScroll}
         />
       )}
 
@@ -176,6 +197,8 @@ const MarkdownPreview: React.FC = () => {
                   lastSaved={lastSaved}
                   isDirty={isDirty}
                   storageWarning={storageWarning}
+                  uploadError={uploadError}
+                  onDismissUploadError={dismissUploadError}
                 />
               </div>
             )}
@@ -214,6 +237,8 @@ const MarkdownPreview: React.FC = () => {
                   lastSaved={lastSaved}
                   isDirty={isDirty}
                   storageWarning={storageWarning}
+                  uploadError={uploadError}
+                  onDismissUploadError={dismissUploadError}
                 />
               </div>
             )}
@@ -267,6 +292,8 @@ const MarkdownPreview: React.FC = () => {
                 lastSaved={lastSaved}
                 isDirty={isDirty}
                 storageWarning={storageWarning}
+                uploadError={uploadError}
+                onDismissUploadError={dismissUploadError}
               />
             </div>
 
@@ -317,6 +344,7 @@ const MarkdownPreview: React.FC = () => {
         onSelectPrev={selectPrevCommand}
       />
     </div>
+    </OnboardingHintProvider>
   );
 };
 

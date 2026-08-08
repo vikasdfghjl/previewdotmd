@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useCallback } from 'react';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onCancel,
 }) => {
   const confirmBtnRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, isOpen);
 
   // Close on Escape
   useEffect(() => {
@@ -76,7 +79,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
     >
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-sm w-full p-6 space-y-4">
+      <div
+        ref={dialogRef}
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-sm w-full p-6 space-y-4"
+      >
         <h2
           id="confirm-dialog-title"
           className="text-lg font-semibold text-gray-900 dark:text-gray-100"

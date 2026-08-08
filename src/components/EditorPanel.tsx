@@ -6,6 +6,7 @@ import { SyntaxHighlightOverlay } from './SyntaxHighlightOverlay';
 import { FormattingToolbar } from './FormattingToolbar';
 import { ConfirmDialog } from './ConfirmDialog';
 import { StorageNotice } from './StorageNotice';
+import { DragDropHint } from './DragDropHint';
 import { useFindReplace } from '@/hooks/useFindReplace';
 import { useEditorShortcuts } from '@/hooks/useEditorShortcuts';
 import { useBracketMatching } from '@/hooks/useBracketMatching';
@@ -29,6 +30,9 @@ interface EditorPanelProps {
   lastSaved?: Date | null;
   isDirty?: boolean;
   storageWarning?: boolean;
+  /** Set when a dropped/selected file fails the .md/.markdown check; shown as a dismissible toast. */
+  uploadError?: string | null;
+  onDismissUploadError?: () => void;
 }
 
 export interface EditorPanelRef {
@@ -61,6 +65,8 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
   lastSaved = null,
   isDirty = false,
   storageWarning = false,
+  uploadError = null,
+  onDismissUploadError,
   ref,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -242,9 +248,12 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
 
   const actions = (
     <>
-      <ActionButton onClick={() => fileInputRef.current?.click()} title="Upload markdown file">
-        <div className="flex items-center gap-1.5">{Icons.upload}<span className="hidden sm:inline">Upload</span></div>
-      </ActionButton>
+      <div className="relative">
+        <ActionButton onClick={() => fileInputRef.current?.click()} title="Upload markdown file">
+          <div className="flex items-center gap-1.5">{Icons.upload}<span className="hidden sm:inline">Upload</span></div>
+        </ActionButton>
+        <DragDropHint />
+      </div>
       <ActionButton onClick={toggleFindReplace} title="Find & Replace (Ctrl+F)">
         <div className="flex items-center gap-1.5">{Icons.search}<span className="hidden sm:inline">Find</span></div>
       </ActionButton>
@@ -388,6 +397,21 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
           </div>
         )}
       </div>
+
+      {uploadError && (
+        <div
+          role="alert"
+          className="flex items-center gap-3 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 border-t border-red-100 dark:border-red-800 text-xs text-red-700 dark:text-red-300"
+        >
+          <span>⚠️ {uploadError}</span>
+          <button
+            onClick={onDismissUploadError}
+            className="ml-auto px-2 py-0.5 pointer-coarse:min-h-11 pointer-coarse:px-3 rounded bg-red-200 dark:bg-red-800 hover:bg-red-300 dark:hover:bg-red-700 text-red-800 dark:text-red-200 font-medium transition-colors flex-shrink-0"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* One-time notice about local-only storage — full-width banner above the stats row. */}
       <StorageNotice />

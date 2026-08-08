@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Command } from '@/hooks/useCommandPalette';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -32,6 +33,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
   onSelectNext,
   onSelectPrev,
 }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, isOpen);
+
   // Pre-compute command ID → index map for O(1) lookups (was O(N²) with findIndex)
   const commandIndexMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -86,6 +90,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
 
       {/* Palette container */}
       <div
+        ref={dialogRef}
         className="relative w-full max-w-2xl mx-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >

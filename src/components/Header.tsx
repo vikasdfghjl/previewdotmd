@@ -4,18 +4,26 @@ import React from 'react';
 import { LayoutControls } from './LayoutControls';
 import { DarkModeToggle } from './DarkModeToggle';
 import { ToolbarButton } from './ToolbarButton';
+import { CommandPaletteHint } from './CommandPaletteHint';
+import { SyncScrollHint } from './SyncScrollHint';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Icons } from '@/constants/icons';
 
 interface HeaderProps {
   githubUrl: string;
-  /** Opens the command palette — surfaced as a button on mobile, where there's no keyboard for Ctrl+Shift+P. */
+  /** Opens the command palette. Always shown — Ctrl+Shift+P has no other visible entry point once the demo content (which mentions it) is cleared. */
   onOpenCommandPalette?: () => void;
+  /** Whether the palette has been opened at least once — dismisses the onboarding hint. */
+  hasOpenedCommandPalette?: boolean;
+  /** Whether sync scroll has been toggled at least once — dismisses its onboarding hint. */
+  hasToggledSyncScroll?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   githubUrl,
   onOpenCommandPalette,
+  hasOpenedCommandPalette = false,
+  hasToggledSyncScroll = false,
 }) => {
   const { showInstall, promptInstall } = useInstallPrompt();
 
@@ -37,13 +45,17 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Inline controls need ~1050px of header; below lg they live in the
             docked bottom bar instead (see MarkdownPreview), so the header
             never overflows the viewport on tablets. */}
-        <LayoutControls className="hidden lg:flex" />
+        <LayoutControls
+          className="hidden lg:flex"
+          syncScrollHint={<SyncScrollHint hasBeenToggled={hasToggledSyncScroll} />}
+        />
 
         {onOpenCommandPalette && (
-          <div className="lg:hidden">
-            <ToolbarButton onClick={onOpenCommandPalette} title="Command palette">
+          <div className="relative">
+            <ToolbarButton onClick={onOpenCommandPalette} title="Command palette (Ctrl+Shift+P)">
               {Icons.search}
             </ToolbarButton>
+            <CommandPaletteHint hasBeenOpened={hasOpenedCommandPalette} />
           </div>
         )}
 

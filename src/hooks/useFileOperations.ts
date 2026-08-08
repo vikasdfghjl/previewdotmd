@@ -1,4 +1,4 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { triggerDownload, EXPORT_CSS } from '@/lib/download';
 
 interface UseFileOperationsProps {
@@ -7,20 +7,23 @@ interface UseFileOperationsProps {
 }
 
 export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperationsProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const markdownRef = useRef(markdown);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     markdownRef.current = markdown;
   }, [markdown]);
 
+  const dismissUploadError = useCallback(() => setUploadError(null), []);
+
   const handleFileUpload = useCallback((file: File) => {
     const fileNameLower = file.name.toLowerCase();
     if (!fileNameLower.endsWith('.md') && !fileNameLower.endsWith('.markdown')) {
-      alert('Please upload a markdown file (.md or .markdown)');
+      setUploadError('Please upload a markdown file (.md or .markdown)');
       return;
     }
 
+    setUploadError(null);
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
@@ -28,34 +31,6 @@ export function useFileOperations({ markdown, onMarkdownChange }: UseFileOperati
     };
     reader.readAsText(file);
   }, [onMarkdownChange]);
-
-  const triggerFileInput = useCallback(() => {
-    fileInputRef.current?.click();
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const files = Array.from(e.dataTransfer.files);
-    const mdFile = files.find(
-      file => {
-        const nameLower = file.name.toLowerCase();
-        return nameLower.endsWith('.md') || nameLower.endsWith('.markdown');
-      }
-    );
-
-    if (mdFile) {
-      handleFileUpload(mdFile);
-    } else if (files.length > 0) {
-      alert('Please drop a markdown file (.md or .markdown)');
-    }
-  }, [handleFileUpload]);
 
   const getRenderedHtml = useCallback((): string => {
     if (typeof window !== 'undefined') {
@@ -112,11 +87,9 @@ ${bodyContent}
   }, [getRenderedHtml]);
 
   return {
-    fileInputRef,
-    triggerFileInput,
     handleFileUpload,
-    handleDragOver,
-    handleDrop,
+    uploadError,
+    dismissUploadError,
     downloadMarkdown,
     exportAsHtml,
     exportAsPdf,

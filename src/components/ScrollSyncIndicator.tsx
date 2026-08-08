@@ -19,7 +19,7 @@ export const ScrollSyncIndicator: React.FC<ScrollSyncIndicatorProps> = ({
   return (
     <div
       className={`
-        flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium
+        flex items-center gap-1.5 px-2 rounded-md text-xs font-medium
         transition-all duration-300 ease-in-out
         ${isActive 
           ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 

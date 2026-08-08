@@ -8,9 +8,11 @@ import { Icons } from '@/constants/icons';
 // Interface Segregation: Small, focused props
 interface LayoutControlsProps {
   className?: string;
+  /** Rendered anchored to the sync-scroll button — used for its one-time onboarding hint. */
+  syncScrollHint?: React.ReactNode;
 }
 
-export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '' }) => {
+export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '', syncScrollHint }) => {
   const {
     layoutMode,
     syncScroll,
@@ -53,14 +55,17 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '' }
       <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
 
       {/* Sync scroll toggle */}
-      <ToolbarButton
-        onClick={toggleSyncScroll}
-        isActive={syncScroll}
-        isToggle
-        title={syncScroll ? 'Disable sync scroll' : 'Enable sync scroll'}
-      >
-        {Icons.syncScroll}
-      </ToolbarButton>
+      <div className="relative">
+        <ToolbarButton
+          onClick={toggleSyncScroll}
+          isActive={syncScroll}
+          isToggle
+          title={syncScroll ? 'Disable sync scroll' : 'Enable sync scroll'}
+        >
+          {Icons.syncScroll}
+        </ToolbarButton>
+        {syncScrollHint}
+      </div>
 
       {/* Reading mode */}
       <ToolbarButton

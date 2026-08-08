@@ -61,6 +61,18 @@ function applyAction(
   }
 }
 
+const UndoIcon = (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l-4-4 4-4M5 10h9a5 5 0 015 5v1" />
+  </svg>
+);
+
+const RedoIcon = (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 14l4-4-4-4M19 10h-9a5 5 0 00-5 5v1" />
+  </svg>
+);
+
 /** SVG path for the bold icon */
 const BoldIcon = (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -245,6 +257,24 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
     [textareaRef, markdown, onChange],
   );
 
+  // Undo/redo ride the textarea's native history (same one Ctrl+Z uses) so
+  // there's a visible control for it — mobile keyboards often have no
+  // reachable undo key. execCommand is deprecated for most uses but remains
+  // the only cross-browser way to trigger a focused textarea's own undo stack.
+  const handleUndo = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.focus();
+    document.execCommand('undo');
+  }, [textareaRef]);
+
+  const handleRedo = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.focus();
+    document.execCommand('redo');
+  }, [textareaRef]);
+
   // Track whether the toolbar has hidden content to either side so we can
   // show a fade hint — on narrow screens not all buttons fit and there's
   // otherwise no visual cue that the row scrolls horizontally.
@@ -280,6 +310,13 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
         role="toolbar"
         aria-label="Markdown formatting"
       >
+        <ToolbarButton size="sm" onClick={handleUndo} title="Undo (Ctrl+Z)">
+          {UndoIcon}
+        </ToolbarButton>
+        <ToolbarButton size="sm" onClick={handleRedo} title="Redo (Ctrl+Y)">
+          {RedoIcon}
+        </ToolbarButton>
+        <div className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0" aria-hidden="true" />
         {TOOLBAR_ACTIONS.map((item) => (
           <ToolbarButton
             key={item.label}
