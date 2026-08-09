@@ -134,6 +134,39 @@ const MarkdownPreview: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [fullscreen, readingMode, toggleFullscreen, toggleReadingMode]);
 
+  // Shared props for EditorPanel/PreviewPanel — built once per render and
+  // spread into whichever layout branch below is active, instead of
+  // repeating the same ~10 props in three near-identical JSX blocks.
+  const editorPanelProps = {
+    ref: editorRef,
+    markdown,
+    onChange: handleChange,
+    onClear: handleClear,
+    onReset: handleReset,
+    isVisible: true,
+    onFileUpload: handleFileUpload,
+    onDownload: downloadMarkdown,
+    onScroll: handleEditorScroll,
+    zoomLevel,
+    lastSaved,
+    isDirty,
+    storageWarning,
+    uploadError,
+    onDismissUploadError: dismissUploadError,
+  };
+
+  const previewPanelProps = {
+    ref: previewRef,
+    markdown: previewMarkdown,
+    isVisible: true,
+    onExportHtml: exportAsHtml,
+    onExportPdf: exportAsPdf,
+    onExportPlainText: exportAsPlainText,
+    zoomLevel,
+    onScroll: handlePreviewScroll,
+    syncScrollActive: syncScroll,
+  };
+
   // Layout configuration — single useMemo replaces 4 separate useCallbacks
   const layoutConfig = useMemo(() => ({
     // Below lg, bottom padding reserves space for the docked layout-controls
@@ -183,39 +216,13 @@ const MarkdownPreview: React.FC = () => {
             {/* Editor Panel - Stacked (skip mount entirely in reading mode) */}
             {!readingMode && (
               <div className="flex-1 min-h-0 border-b">
-                <EditorPanel
-                  ref={editorRef}
-                  markdown={markdown}
-                  onChange={handleChange}
-                  onClear={handleClear}
-                  onReset={handleReset}
-                  isVisible={true}
-                  onFileUpload={handleFileUpload}
-                  onDownload={downloadMarkdown}
-                  onScroll={handleEditorScroll}
-                  zoomLevel={zoomLevel}
-                  lastSaved={lastSaved}
-                  isDirty={isDirty}
-                  storageWarning={storageWarning}
-                  uploadError={uploadError}
-                  onDismissUploadError={dismissUploadError}
-                />
+                <EditorPanel {...editorPanelProps} />
               </div>
             )}
 
             {/* Preview Panel - Stacked */}
             <div className="flex-1 min-h-0">
-              <PreviewPanel
-                ref={previewRef}
-                markdown={previewMarkdown}
-                isVisible={true}
-                onExportHtml={exportAsHtml}
-                onExportPdf={exportAsPdf}
-                onExportPlainText={exportAsPlainText}
-                zoomLevel={zoomLevel}
-                onScroll={handlePreviewScroll}
-                syncScrollActive={syncScroll}
-              />
+              <PreviewPanel {...previewPanelProps} />
             </div>
           </>
         ) : layoutMode === 'split' ? (
@@ -223,23 +230,7 @@ const MarkdownPreview: React.FC = () => {
             {/* Editor Panel - Split (skip mount entirely in reading mode) */}
             {!readingMode && (
               <div className="min-w-0 overflow-hidden" style={layoutConfig.editorStyle}>
-                <EditorPanel
-                  ref={editorRef}
-                  markdown={markdown}
-                  onChange={handleChange}
-                  onClear={handleClear}
-                  onReset={handleReset}
-                  isVisible={true}
-                  onFileUpload={handleFileUpload}
-                  onDownload={downloadMarkdown}
-                  onScroll={handleEditorScroll}
-                  zoomLevel={zoomLevel}
-                  lastSaved={lastSaved}
-                  isDirty={isDirty}
-                  storageWarning={storageWarning}
-                  uploadError={uploadError}
-                  onDismissUploadError={dismissUploadError}
-                />
+                <EditorPanel {...editorPanelProps} />
               </div>
             )}
 
@@ -254,17 +245,7 @@ const MarkdownPreview: React.FC = () => {
 
             {/* Preview Panel - Split */}
             <div className="min-w-0 overflow-hidden" style={readingMode ? undefined : layoutConfig.previewStyle}>
-              <PreviewPanel
-                ref={previewRef}
-                markdown={previewMarkdown}
-                isVisible={true}
-                onExportHtml={exportAsHtml}
-                onExportPdf={exportAsPdf}
-                onExportPlainText={exportAsPlainText}
-                zoomLevel={zoomLevel}
-                onScroll={handlePreviewScroll}
-                syncScrollActive={syncScroll}
-              />
+              <PreviewPanel {...previewPanelProps} />
             </div>
           </>
         ) : (
@@ -278,23 +259,7 @@ const MarkdownPreview: React.FC = () => {
               aria-labelledby="editor-tab"
               className={activeTab === 'editor' && !readingMode ? 'flex-1 min-h-0' : 'hidden'}
             >
-              <EditorPanel
-                ref={editorRef}
-                markdown={markdown}
-                onChange={handleChange}
-                onClear={handleClear}
-                onReset={handleReset}
-                isVisible={true}
-                onFileUpload={handleFileUpload}
-                onDownload={downloadMarkdown}
-                onScroll={handleEditorScroll}
-                zoomLevel={zoomLevel}
-                lastSaved={lastSaved}
-                isDirty={isDirty}
-                storageWarning={storageWarning}
-                uploadError={uploadError}
-                onDismissUploadError={dismissUploadError}
-              />
+              <EditorPanel {...editorPanelProps} />
             </div>
 
             <div
@@ -303,17 +268,7 @@ const MarkdownPreview: React.FC = () => {
               aria-labelledby="preview-tab"
               className={activeTab === 'preview' || readingMode ? 'flex-1 min-h-0' : 'hidden'}
             >
-              <PreviewPanel
-                ref={previewRef}
-                markdown={previewMarkdown}
-                isVisible={true}
-                onExportHtml={exportAsHtml}
-                onExportPdf={exportAsPdf}
-                onExportPlainText={exportAsPlainText}
-                zoomLevel={zoomLevel}
-                onScroll={handlePreviewScroll}
-                syncScrollActive={syncScroll}
-              />
+              <PreviewPanel {...previewPanelProps} />
             </div>
           </>
         )}

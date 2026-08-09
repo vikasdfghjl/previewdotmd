@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { getStorageItem, setStorageItem } from '@/lib/safeStorage';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -10,12 +11,7 @@ interface BeforeInstallPromptEvent extends Event {
 const DISMISSED_KEY = 'pwa-install-dismissed';
 
 function wasDismissed(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    return localStorage.getItem(DISMISSED_KEY) === '1';
-  } catch {
-    return false; // localStorage unavailable
-  }
+  return getStorageItem(DISMISSED_KEY) === '1';
 }
 
 /**
@@ -70,11 +66,7 @@ export function useInstallPrompt() {
 
   const dismissInstall = useCallback(() => {
     setIsDismissed(true);
-    try {
-      localStorage.setItem(DISMISSED_KEY, '1');
-    } catch {
-      // localStorage unavailable
-    }
+    setStorageItem(DISMISSED_KEY, '1');
   }, []);
 
   /** True when we should show an install button. */

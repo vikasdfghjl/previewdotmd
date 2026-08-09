@@ -122,6 +122,15 @@ export default function RootLayout({
     >
       <head>
         <script
+          // Runs before hydration to apply the saved/system theme to <html>
+          // immediately, avoiding a light->dark flash. ThemeContext resolves
+          // its own React state the same way, after mount (see ThemeContext.tsx).
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.classList.add(t);}catch(e){}})();",
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({

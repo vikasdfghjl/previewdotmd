@@ -81,9 +81,13 @@ function highlightBracketMatch(html: string, lineIndex: number, match: BracketMa
   const bracketClass = 'bg-yellow-300 dark:bg-yellow-600 rounded';
 
   if (isOpenLine && isCloseLine) {
-    // Both on same line - this is rare but possible
-    // This is a simplified approach - for exact positioning we'd need character mapping
-    return html; // Skip complex same-line case for now
+    // Both brackets on the same line — highlight the later column first so
+    // inserting its <span> doesn't shift the index of the earlier one.
+    const first = Math.min(match.open.column, match.close.column);
+    const second = Math.max(match.open.column, match.close.column);
+    html = highlightCharAtPosition(html, second, bracketClass);
+    html = highlightCharAtPosition(html, first, bracketClass);
+    return html;
   }
 
   if (isOpenLine) {

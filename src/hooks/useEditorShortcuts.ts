@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react';
+import { applyTextareaFormat, wrapAsBold, wrapAsItalic, wrapAsLink } from '@/lib/textareaFormat';
 
 interface UseEditorShortcutOptions {
   markdown: string;
@@ -27,42 +28,21 @@ export function useEditorShortcuts({
       return;
     }
 
-    if (textareaRef.current && document.activeElement === textareaRef.current) {
-      const textarea = textareaRef.current;
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selectedText = markdown.slice(start, end);
+    const textarea = textareaRef.current;
+    if (!textarea || document.activeElement !== textarea) return;
 
-      if ((e.ctrlKey || e.metaKey) && key === 'b') {
-        e.preventDefault();
-        const wrapped = `**${selectedText}**`;
-        onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
-        setTimeout(() => {
-          textarea.setSelectionRange(start + 2, end + 2);
-        }, 0);
-      }
-
-      if ((e.ctrlKey || e.metaKey) && key === 'i') {
-        e.preventDefault();
-        const wrapped = `*${selectedText}*`;
-        onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
-        setTimeout(() => {
-          textarea.setSelectionRange(start + 1, end + 1);
-        }, 0);
-      }
-
-      if ((e.ctrlKey || e.metaKey) && key === 'k') {
-        e.preventDefault();
-        const wrapped = `[${selectedText}](url)`;
-        onChange(markdown.slice(0, start) + wrapped + markdown.slice(end));
-        setTimeout(() => {
-          if (selectedText) {
-            textarea.setSelectionRange(start + wrapped.length - 4, start + wrapped.length - 1);
-          } else {
-            textarea.setSelectionRange(start + 1, end + 1);
-          }
-        }, 0);
-      }
+    // Same actions the formatting toolbar buttons use, applied via native
+    // setRangeText so Ctrl+Z undoes the shortcut the same way it undoes a
+    // toolbar click (see src/lib/textareaFormat.ts).
+    if ((e.ctrlKey || e.metaKey) && key === 'b') {
+      e.preventDefault();
+      applyTextareaFormat(textarea, markdown, onChange, wrapAsBold);
+    } else if ((e.ctrlKey || e.metaKey) && key === 'i') {
+      e.preventDefault();
+      applyTextareaFormat(textarea, markdown, onChange, wrapAsItalic);
+    } else if ((e.ctrlKey || e.metaKey) && key === 'k') {
+      e.preventDefault();
+      applyTextareaFormat(textarea, markdown, onChange, wrapAsLink);
     }
   }, [markdown, onChange, textareaRef, onOpenFindReplace]);
 

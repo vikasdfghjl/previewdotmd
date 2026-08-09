@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { getStorageItem, setStorageItem, removeStorageItem } from '@/lib/safeStorage';
 
 // Single Responsibility: Layout mode definitions
 export type LayoutMode = 'split' | 'stacked' | 'tabbed';
@@ -61,9 +62,9 @@ interface PersistedPrefs {
 
 /** Reads and sanitizes persisted layout preferences; null when absent/invalid. */
 function loadPrefs(): PersistedPrefs | null {
+  const raw = getStorageItem(PREFS_KEY);
+  if (!raw) return null;
   try {
-    const raw = localStorage.getItem(PREFS_KEY);
-    if (!raw) return null;
     const parsed = JSON.parse(raw) as PersistedPrefs;
     const prefs: PersistedPrefs = {};
     if (LAYOUT_MODES.includes(parsed.layoutMode as LayoutMode)) prefs.layoutMode = parsed.layoutMode;
@@ -72,6 +73,7 @@ function loadPrefs(): PersistedPrefs | null {
     if (typeof parsed.editorWidth === 'number') prefs.editorWidth = Math.max(10, Math.min(90, parsed.editorWidth));
     return prefs;
   } catch {
+    // Malformed JSON in storage
     return null;
   }
 }
@@ -164,11 +166,7 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
 
   const resetLayout = useCallback(() => {
     userChoseLayoutRef.current = false;
-    try {
-      localStorage.removeItem(PREFS_KEY);
-    } catch (err) {
-      console.warn('[LayoutContext] Unable to clear layout preferences from storage:', err);
-    }
+    removeStorageItem(PREFS_KEY);
     setState(DEFAULT_STATE);
     setEditorWidthState(DEFAULT_EDITOR_WIDTH);
   }, []);
@@ -180,18 +178,14 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!prefsLoadedRef.current) return;
     const timer = setTimeout(() => {
-      try {
-        const layoutMode = userChoseLayoutRef.current ? state.layoutMode : loadPrefs()?.layoutMode;
-        const prefs: PersistedPrefs = {
-          ...(layoutMode !== undefined && { layoutMode }),
-          syncScroll: state.syncScroll,
-          zoomLevel: state.zoomLevel,
-          editorWidth,
-        };
-        localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
-      } catch {
-        // storage full/unavailable — non-fatal
-      }
+      const layoutMode = userChoseLayoutRef.current ? state.layoutMode : loadPrefs()?.layoutMode;
+      const prefs: PersistedPrefs = {
+        ...(layoutMode !== undefined && { layoutMode }),
+        syncScroll: state.syncScroll,
+        zoomLevel: state.zoomLevel,
+        editorWidth,
+      };
+      setStorageItem(PREFS_KEY, JSON.stringify(prefs));
     }, 250);
     return () => clearTimeout(timer);
   }, [state.layoutMode, state.syncScroll, state.zoomLevel, editorWidth]);

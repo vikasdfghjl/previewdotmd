@@ -1,41 +1,32 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { DEFAULT_MARKDOWN } from '@/constants/defaultMarkdown';
+import { getStorageItem, setStorageItem } from '@/lib/safeStorage';
 
 const STORAGE_KEY = 'previewdotmd-content';
 const AUTOSAVE_DELAY_MS = 1000; // 1 second debounce
 const PREVIEW_DEBOUNCE_DELAY_MS = 150; // ms - throttle preview re-renders
 
-function loadFromStorage(): string | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function saveToStorage(content: string): boolean {
-  if (typeof window === 'undefined') return true;
-  try {
-    localStorage.setItem(STORAGE_KEY, content);
-    return true;
-  } catch {
-    // Storage full or unavailable — return false so the UI can warn the user
-    return false;
-  }
-}
-
 export function useMarkdownState(initialValue?: string) {
-  const [markdown, setMarkdown] = useState<string>(() => {
-    const saved = loadFromStorage();
-    return saved ?? initialValue ?? DEFAULT_MARKDOWN;
-  });
+  // Initialize deterministically (same on server and first client render) —
+  // reading localStorage here would make hydration diverge from the SSR
+  // output. The saved value is applied after mount instead, see below.
+  const [markdown, setMarkdown] = useState<string>(() => initialValue ?? DEFAULT_MARKDOWN);
   const [previewMarkdown, setPreviewMarkdown] = useState<string>(markdown);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previewDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [storageWarning, setStorageWarning] = useState(false);
+
+  // Load any saved content once, after hydration completes.
+  useEffect(() => {
+    const saved = getStorageItem(STORAGE_KEY);
+    if (saved !== null && saved !== markdown) {
+      setMarkdown(saved);
+      setPreviewMarkdown(saved);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Debounce preview rendering to reduce re-renders on fast typing
   useEffect(() => {
@@ -59,7 +50,7 @@ export function useMarkdownState(initialValue?: string) {
       clearTimeout(saveTimeoutRef.current);
     }
     saveTimeoutRef.current = setTimeout(() => {
-      const ok = saveToStorage(markdown);
+      const ok = setStorageItem(STORAGE_KEY, markdown);
       if (!ok) {
         setStorageWarning(true);
       } else {

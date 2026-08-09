@@ -2,6 +2,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ToolbarButton } from './ToolbarButton';
+import { applyTextareaFormat, wrapAsBold, wrapAsItalic, wrapAsLink, type FormatAction } from '@/lib/textareaFormat';
+import { Icons } from '@/constants/icons';
 
 interface FormattingToolbarProps {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
@@ -14,134 +16,8 @@ interface ToolbarAction {
   title: string;
   shortcut?: string;
   icon: React.ReactNode;
-  action: (sel: { text: string; start: number; end: number }) => {
-    replacement: string;
-    cursorOffset?: number;
-    newCursorStart?: number;
-    newCursorEnd?: number;
-  };
+  action: FormatAction;
 }
-
-/**
- * Applies a formatting action using native textarea mutations so the browser's
- * undo stack records the change (Ctrl+Z works correctly).
- */
-function applyAction(
-  textarea: HTMLTextAreaElement,
-  markdown: string,
-  onChange: (value: string) => void,
-  action: ToolbarAction['action'],
-) {
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const selectedText = markdown.slice(start, end);
-
-  const { replacement, newCursorStart, newCursorEnd } = action({
-    text: selectedText,
-    start,
-    end,
-  });
-
-  // Use native setRangeText so the browser's undo history records the mutation.
-  // Important: save the old value first so we can compute cursor position.
-  const oldValue = textarea.value;
-
-  textarea.focus();
-  textarea.setRangeText(replacement, start, end, 'select');
-  // Move cursor to the desired position
-  const cursorStart = newCursorStart ?? start + replacement.length;
-  const cursorEnd = newCursorEnd ?? start + replacement.length;
-  textarea.setSelectionRange(cursorStart, cursorEnd);
-
-  // If setRangeText actually changed the value, sync React state.
-  // setRangeText dispatches a native 'input' event in most browsers,
-  // but we also fire one explicitly for compatibility.
-  if (textarea.value !== oldValue) {
-    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-  }
-}
-
-const UndoIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l-4-4 4-4M5 10h9a5 5 0 015 5v1" />
-  </svg>
-);
-
-const RedoIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 14l4-4-4-4M19 10h-9a5 5 0 00-5 5v1" />
-  </svg>
-);
-
-/** SVG path for the bold icon */
-const BoldIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 4h8a4 4 0 014 4 4 4 0 01-4 4H6z M6 12h9a4 4 0 014 4 4 4 0 01-4 4H6z" />
-  </svg>
-);
-
-const ItalicIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 4h4M12 4v16M14 20h-4" />
-  </svg>
-);
-
-const StrikethroughIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M17.5 12c0 3-2 4-5.5 4S6.5 15 6.5 12M17.5 12c0-3-2-4-5.5-4S6.5 9 6.5 12" />
-  </svg>
-);
-
-const CodeIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 4l-4 8 4 8M16 4l4 8-4 8" />
-  </svg>
-);
-
-const LinkIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-  </svg>
-);
-
-const ImageIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-);
-
-const ListIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-  </svg>
-);
-
-const OrderedListIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4h14M7 8h14M7 12h14M7 16h14M3 4h.01M3 8h.01M3 12h.01M3 16h.01" />
-  </svg>
-);
-
-const QuoteIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9H6l4 8h2M18 9h-4l4 8h2" />
-  </svg>
-);
-
-const TableIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth={2} />
-    <line x1="3" y1="9" x2="21" y2="9" strokeWidth={2} />
-    <line x1="3" y1="15" x2="21" y2="15" strokeWidth={2} />
-    <line x1="9" y1="3" x2="9" y2="21" strokeWidth={2} />
-  </svg>
-);
-
-const DividerIcon = (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14" />
-  </svg>
-);
 
 function prefixLines(text: string, prefix: string): string {
   if (!text) return prefix;
@@ -152,57 +28,27 @@ function prefixLines(text: string, prefix: string): string {
 }
 
 const TOOLBAR_ACTIONS: ToolbarAction[] = [
+  { label: 'Bold', title: 'Bold (Ctrl+B)', shortcut: 'Ctrl+B', icon: Icons.bold, action: wrapAsBold },
+  { label: 'Italic', title: 'Italic (Ctrl+I)', shortcut: 'Ctrl+I', icon: Icons.italic, action: wrapAsItalic },
   {
-    label: 'Bold', title: 'Bold (Ctrl+B)', shortcut: 'Ctrl+B', icon: BoldIcon,
-    action: ({ text }) => ({
-      replacement: `**${text || 'bold text'}**`,
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
+    label: 'Strikethrough', title: 'Strikethrough', icon: Icons.strikethrough,
+    action: ({ text }) => ({ replacement: `~~${text || 'strikethrough'}~~` }),
   },
   {
-    label: 'Italic', title: 'Italic (Ctrl+I)', shortcut: 'Ctrl+I', icon: ItalicIcon,
-    action: ({ text }) => ({
-      replacement: `*${text || 'italic text'}*`,
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
+    label: 'Code', title: 'Inline Code', icon: Icons.formatCode,
+    action: ({ text }) => ({ replacement: `\`${text || 'code'}\`` }),
+  },
+  { label: 'Link', title: 'Insert Link (Ctrl+K)', shortcut: 'Ctrl+K', icon: Icons.link, action: wrapAsLink },
+  {
+    label: 'Image', title: 'Insert Image', icon: Icons.image,
+    action: ({ text }) => ({ replacement: `![${text || 'alt text'}](url)` }),
   },
   {
-    label: 'Strikethrough', title: 'Strikethrough', icon: StrikethroughIcon,
-    action: ({ text }) => ({
-      replacement: `~~${text || 'strikethrough'}~~`,
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
+    label: 'List', title: 'Unordered List', icon: Icons.list,
+    action: ({ text }) => ({ replacement: prefixLines(text, '- ') }),
   },
   {
-    label: 'Code', title: 'Inline Code', icon: CodeIcon,
-    action: ({ text }) => ({
-      replacement: `\`${text || 'code'}\``,
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
-  },
-  {
-    label: 'Link', title: 'Insert Link (Ctrl+K)', shortcut: 'Ctrl+K', icon: LinkIcon,
-    action: ({ text }) => ({
-      replacement: `[${text || 'link text'}](url)`,
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
-  },
-  {
-    label: 'Image', title: 'Insert Image', icon: ImageIcon,
-    action: ({ text }) => ({
-      replacement: `![${text || 'alt text'}](url)`,
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
-  },
-  {
-    label: 'List', title: 'Unordered List', icon: ListIcon,
-    action: ({ text }) => ({
-      replacement: prefixLines(text, '- '),
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
-  },
-  {
-    label: 'Numbered List', title: 'Ordered List', icon: OrderedListIcon,
+    label: 'Numbered List', title: 'Ordered List', icon: Icons.orderedList,
     action: ({ text }) => ({
       replacement: text
         ? text
@@ -210,36 +56,23 @@ const TOOLBAR_ACTIONS: ToolbarAction[] = [
             .map((line, i) => `${i + 1}. ${line}`)
             .join('\n')
         : '1. ',
-      newCursorStart: undefined, newCursorEnd: undefined,
     }),
   },
   {
-    label: 'Quote', title: 'Blockquote', icon: QuoteIcon,
-    action: ({ text }) => ({
-      replacement: prefixLines(text, '> '),
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
+    label: 'Quote', title: 'Blockquote', icon: Icons.quote,
+    action: ({ text }) => ({ replacement: prefixLines(text, '> ') }),
   },
   {
-    label: 'Table', title: 'Insert Table', icon: TableIcon,
-    action: () => ({
-      replacement: '| Header | Header | Header |\n|--------|--------|--------|\n| Cell   | Cell   | Cell   |\n| Cell   | Cell   | Cell   |\n',
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
+    label: 'Table', title: 'Insert Table', icon: Icons.table,
+    action: () => ({ replacement: '| Header | Header | Header |\n|--------|--------|--------|\n| Cell   | Cell   | Cell   |\n| Cell   | Cell   | Cell   |\n' }),
   },
   {
-    label: 'Code Block', title: 'Code Block', icon: CodeIcon,
-    action: ({ text }) => ({
-      replacement: `\`\`\`\n${text || 'code'}\n\`\`\``,
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
+    label: 'Code Block', title: 'Code Block', icon: Icons.formatCode,
+    action: ({ text }) => ({ replacement: `\`\`\`\n${text || 'code'}\n\`\`\`` }),
   },
   {
-    label: 'Divider', title: 'Horizontal Rule', icon: DividerIcon,
-    action: () => ({
-      replacement: '\n---\n',
-      newCursorStart: undefined, newCursorEnd: undefined,
-    }),
+    label: 'Divider', title: 'Horizontal Rule', icon: Icons.divider,
+    action: () => ({ replacement: '\n---\n' }),
   },
 ];
 
@@ -252,7 +85,7 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
     (action: ToolbarAction['action']) => {
       const textarea = textareaRef.current;
       if (!textarea) return;
-      applyAction(textarea, markdown, onChange, action);
+      applyTextareaFormat(textarea, markdown, onChange, action);
     },
     [textareaRef, markdown, onChange],
   );
@@ -311,10 +144,10 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
         aria-label="Markdown formatting"
       >
         <ToolbarButton size="sm" onClick={handleUndo} title="Undo (Ctrl+Z)">
-          {UndoIcon}
+          {Icons.undo}
         </ToolbarButton>
         <ToolbarButton size="sm" onClick={handleRedo} title="Redo (Ctrl+Y)">
-          {RedoIcon}
+          {Icons.redo}
         </ToolbarButton>
         <div className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1 flex-shrink-0" aria-hidden="true" />
         {TOOLBAR_ACTIONS.map((item) => (

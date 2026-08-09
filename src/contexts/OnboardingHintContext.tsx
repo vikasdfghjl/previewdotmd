@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
+import { getStorageItem, setStorageItem } from '@/lib/safeStorage';
 
 // Order matters — hints are shown one at a time, in this sequence, so a
 // first-time user is never looking at more than one coachmark at once.
@@ -11,21 +12,15 @@ function storageKey(key: HintKey) {
   return `previewmd-hint-${key}-dismissed`;
 }
 
+// getStorageItem returns null both when unset and when storage is
+// unavailable — either way there's no point showing hints, so both cases
+// fall through to "dismissed".
 function isDismissed(key: HintKey): boolean {
-  if (typeof window === 'undefined') return true; // hide during server prerender
-  try {
-    return localStorage.getItem(storageKey(key)) === '1';
-  } catch {
-    return true; // localStorage unavailable — no point showing hints
-  }
+  return getStorageItem(storageKey(key)) === '1';
 }
 
 function persistDismissed(key: HintKey) {
-  try {
-    localStorage.setItem(storageKey(key), '1');
-  } catch {
-    // ignore
-  }
+  setStorageItem(storageKey(key), '1');
 }
 
 interface OnboardingHintContextValue {

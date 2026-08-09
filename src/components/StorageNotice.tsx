@@ -1,16 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { getStorageItem, setStorageItem } from '@/lib/safeStorage';
 
 const DISMISSED_KEY = 'previewmd-storage-notice-dismissed';
 
 function wasDismissed(): boolean {
-  if (typeof window === 'undefined') return true; // hide during server prerender
-  try {
-    return localStorage.getItem(DISMISSED_KEY) === '1';
-  } catch {
-    return true; // localStorage unavailable — no point showing the notice
-  }
+  return getStorageItem(DISMISSED_KEY) === '1';
 }
 
 /**
@@ -37,11 +33,7 @@ export const StorageNotice: React.FC = () => {
       <button
         onClick={() => {
           setVisible(false);
-          try {
-            localStorage.setItem(DISMISSED_KEY, '1');
-          } catch {
-            // ignore
-          }
+          setStorageItem(DISMISSED_KEY, '1');
         }}
         className="ml-auto px-2 py-0.5 pointer-coarse:min-h-11 pointer-coarse:px-3 rounded bg-blue-200 dark:bg-blue-800 hover:bg-blue-300 dark:hover:bg-blue-700 text-blue-800 dark:text-blue-200 font-medium transition-colors flex-shrink-0"
       >

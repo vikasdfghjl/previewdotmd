@@ -3,6 +3,7 @@
 import React, { useMemo, useRef } from 'react';
 import { Command } from '@/hooks/useCommandPalette';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { Icons } from '@/constants/icons';
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -96,19 +97,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
       >
         {/* Search input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-          <svg
-            className="w-5 h-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <span className="text-gray-400">{Icons.searchLarge}</span>
           <input
             type="text"
             value={query}
@@ -128,19 +117,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
         <div className="max-h-[60vh] overflow-y-auto">
           {commands.length === 0 ? (
             <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-              <svg
-                className="w-12 h-12 mx-auto mb-3 opacity-50"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              {Icons.noResults}
               <p>No commands found</p>
               <p className="text-sm mt-1 opacity-70">
                 Try a different search term
@@ -179,21 +156,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = React.memo(({
                       >
                         {/* Icon */}
                         <span className="flex-shrink-0 w-5 h-5 opacity-70">
-                          {cmd.icon || (
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M13 10V3L4 14h7v7l9-11h-7z"
-                              />
-                            </svg>
-                          )}
+                          {cmd.icon || Icons.commandFallback}
                         </span>
 
                         {/* Label and description */}

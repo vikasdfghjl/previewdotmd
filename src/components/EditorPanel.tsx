@@ -11,7 +11,6 @@ import { useFindReplace } from '@/hooks/useFindReplace';
 import { useEditorShortcuts } from '@/hooks/useEditorShortcuts';
 import { useBracketMatching } from '@/hooks/useBracketMatching';
 import { useSmartTyping } from '@/hooks/useSmartTyping';
-import { useColumnSelection } from '@/hooks/useColumnSelection';
 import { useAutoComplete } from '@/hooks/useAutoComplete';
 import { scrollToPercentage, getScrollPercentage } from '@/lib/scroll';
 import { Icons } from '@/constants/icons';
@@ -112,13 +111,6 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
     autoCloseQuotes: true,
     autoCloseMarkdown: true,
   });
-
-  // Column selection - Alt+Drag for rectangular selection
-  const {
-    handleMouseDown: handleColumnMouseDown,
-    handleMouseMove: handleColumnMouseMove,
-    handleMouseUp: handleColumnMouseUp,
-  } = useColumnSelection(textareaRef, markdown);
 
   // Auto-completion - Markdown syntax suggestions
   const {
@@ -338,10 +330,6 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
               onChange={(e) => onChange(e.target.value)}
               onKeyDown={handleKeyDown}
               onInput={handleInput}
-              onMouseDown={handleColumnMouseDown}
-              onMouseMove={handleColumnMouseMove}
-              onMouseUp={handleColumnMouseUp}
-              onMouseLeave={handleColumnMouseUp}
               placeholder="# Start writing your markdown..."
               spellCheck={false}
               aria-label="Markdown editor. Enter markdown content here."

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getStorageItem, setStorageItem } from '@/lib/safeStorage';
 
 export type Theme = 'light' | 'dark';
 
@@ -17,30 +18,35 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const savedTheme = localStorage.getItem('theme') as Theme | null;
-        if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        return systemPrefersDark ? 'dark' : 'light';
-      } catch {
-        return 'light';
+  // Always start from the same deterministic default on server and first
+  // client render — reading localStorage/matchMedia here would make the
+  // client's initial render diverge from the server-rendered HTML and
+  // trigger a hydration mismatch. The real theme is resolved after mount.
+  const [theme, setThemeState] = useState<Theme>('light');
+
+  // Resolve the actual theme (saved choice or system preference) once,
+  // after hydration completes.
+  useEffect(() => {
+    try {
+      const savedTheme = getStorageItem('theme') as Theme | null;
+      if (savedTheme === 'light' || savedTheme === 'dark') {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setThemeState(savedTheme);
+        return;
       }
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setThemeState(systemPrefersDark ? 'dark' : 'light');
+    } catch {
+      // keep default 'light'
     }
-    return 'light';
-  });
+  }, []);
 
   // Apply theme to document element and persist choice
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    try {
-      localStorage.setItem('theme', theme);
-    } catch {
-      // Storage full or unavailable
-    }
+    setStorageItem('theme', theme);
   }, [theme]);
 
   // Listen to system theme preference changes when no explicit choice stored
@@ -48,11 +54,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     if (typeof window === 'undefined') return;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleSystemThemeChange = (e: MediaQueryListEvent) => {
-      try {
-        if (!localStorage.getItem('theme')) {
-          setThemeState(e.matches ? 'dark' : 'light');
-        }
-      } catch {
+      // No stored theme (unset, or storage unavailable) — follow the system.
+      if (!getStorageItem('theme')) {
         setThemeState(e.matches ? 'dark' : 'light');
       }
     };
