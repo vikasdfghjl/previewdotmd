@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ClientLayout from "@/components/ClientLayout";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { FAQ_ITEMS } from "@/constants/faq";
 
 export const viewport: Viewport = {
   themeColor: [
@@ -164,6 +165,26 @@ export default function RootLayout({
               browserRequirements: 'requires JavaScript',
               permissions: 'clipboardWrite',
               sameAs: ['https://github.com/vikasdfghjl/previewdotmd'],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            // Mirrors the visible Q&A in FaqPanel.tsx (opened via the header's
+            // help button) — content and schema share FAQ_ITEMS as their
+            // single source of truth so they can't drift out of sync.
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: FAQ_ITEMS.map((item) => ({
+                '@type': 'Question',
+                name: item.question,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: item.answer,
+                },
+              })),
             }),
           }}
         />

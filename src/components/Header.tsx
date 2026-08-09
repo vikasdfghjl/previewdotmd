@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { LayoutControls } from './LayoutControls';
 import { DarkModeToggle } from './DarkModeToggle';
 import { ToolbarButton } from './ToolbarButton';
 import { CommandPaletteHint } from './CommandPaletteHint';
 import { SyncScrollHint } from './SyncScrollHint';
+import { FaqPanel } from './FaqPanel';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Icons } from '@/constants/icons';
 
@@ -26,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   hasToggledSyncScroll = false,
 }) => {
   const { showInstall, promptInstall } = useInstallPrompt();
+  const [faqOpen, setFaqOpen] = useState(false);
 
   return (
     <header className="panel-header flex items-center justify-between px-5 py-3 border-b flex-shrink-0">
@@ -59,6 +61,10 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
 
+        <ToolbarButton onClick={() => setFaqOpen(true)} title="Frequently asked questions">
+          {Icons.help}
+        </ToolbarButton>
+
         <DarkModeToggle />
 
         {showInstall && (
@@ -85,11 +91,13 @@ export const Header: React.FC<HeaderProps> = ({
           title="View on GitHub"
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- static export has no Image loader configured */}
-          <img src="/logo/GitHub_Invertocat_Black_Clearspace.png" alt="" className="w-5 h-5 dark:hidden" />
+          <img src="/logo/GitHub_Invertocat_Black_Clearspace.png" alt="GitHub" className="w-5 h-5 dark:hidden" />
           {/* eslint-disable-next-line @next/next/no-img-element -- static export has no Image loader configured */}
-          <img src="/logo/GitHub_Invertocat_White_Clearspace.png" alt="" className="w-5 h-5 hidden dark:block" />
+          <img src="/logo/GitHub_Invertocat_White_Clearspace.png" alt="GitHub" className="w-5 h-5 hidden dark:block" />
         </a>
       </div>
+
+      <FaqPanel isOpen={faqOpen} onClose={() => setFaqOpen(false)} />
     </header>
   );
 };

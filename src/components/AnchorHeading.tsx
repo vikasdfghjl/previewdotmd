@@ -58,12 +58,16 @@ export const AnchorHeading: React.FC<AnchorHeadingProps> = ({
     }
   };
 
+  // Rendered content lives inside a page that already has its own single
+  // <h1> (the "Preview.md" site title in Header.tsx). Document headings are
+  // offset down one level so a user's `# Heading` doesn't create a second
+  // <h1> and the outline nests correctly under the real page title.
   const headings: Record<number, React.ElementType> = {
-    1: 'h1',
-    2: 'h2',
-    3: 'h3',
-    4: 'h4',
-    5: 'h5',
+    1: 'h2',
+    2: 'h3',
+    3: 'h4',
+    4: 'h5',
+    5: 'h6',
     6: 'h6',
   };
   const Tag = headings[level];
