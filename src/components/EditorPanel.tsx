@@ -269,13 +269,11 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
   return (
     <div className="panel flex flex-col h-full border-r">
       <PanelHeader
-        title="Markdown Input"
-        subtitle="Paste or write markdown"
+        title="Editor"
         icon={Icons.edit}
         actions={actions}
         onToggle={onToggle}
         isHidden={!isVisible}
-        showTitle={false}
       />
 
       <input ref={fileInputRef} type="file" accept=".md,.markdown" onChange={handleFileSelect} className="hidden" />

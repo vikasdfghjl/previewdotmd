@@ -150,8 +150,7 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
   return (
     <div className="panel flex flex-col h-full">
       <PanelHeader
-        title="Live Preview"
-        subtitle="Formatted output"
+        title="Preview"
         icon={Icons.eye}
         actions={
           <>
@@ -161,7 +160,6 @@ export const PreviewPanel = React.memo<PreviewPanelProps & { ref?: React.Ref<Pre
         }
         onToggle={onToggle}
         isHidden={!isVisible}
-        showSubtitle={false}
       />
 
       {/* Preview container with TOC sidebar */}

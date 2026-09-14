@@ -55,7 +55,7 @@ export const Header: React.FC<HeaderProps> = ({
         {onOpenCommandPalette && (
           <div className="relative">
             <ToolbarButton onClick={onOpenCommandPalette} title="Command palette (Ctrl+Shift+P)">
-              {Icons.search}
+              {Icons.command}
             </ToolbarButton>
             <CommandPaletteHint hasBeenOpened={hasOpenedCommandPalette} />
           </div>
