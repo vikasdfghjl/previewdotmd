@@ -168,18 +168,37 @@ const MarkdownPreview: React.FC = () => {
   };
 
   // Layout configuration — single useMemo replaces 4 separate useCallbacks
+  //
+  // Split mode's side-by-side columns only make sense once there's enough
+  // width to share (lg breakpoint) — including in fullscreen, which mobile
+  // users can also reach via the layout-controls bar. Below that, split
+  // collapses to stacked panels instead of squeezing two unreadable slivers.
+  const splitIsSideBySide = layoutMode === 'split' && !readingMode;
   const layoutConfig = useMemo(() => ({
     // Below lg, bottom padding reserves space for the docked layout-controls
     // bar so it never covers the panel status bars.
     containerClass: fullscreen
       ? 'fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col'
       : 'flex flex-col h-dvh w-full relative pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0',
-    mainClass: (readingMode || fullscreen || layoutMode === 'split')
+    mainClass: readingMode
       ? 'flex-1 flex overflow-hidden'
-      : 'flex-1 flex flex-col overflow-hidden',
-    editorStyle: layoutMode === 'split' ? { width: `${editorWidth}%` } : ({} as React.CSSProperties),
-    previewStyle: layoutMode === 'split' ? { width: `${100 - editorWidth}%` } : ({} as React.CSSProperties),
-  }), [readingMode, fullscreen, layoutMode, editorWidth]);
+      : layoutMode === 'split'
+        ? 'flex-1 flex flex-col lg:flex-row overflow-hidden'
+        : fullscreen
+          ? 'flex-1 flex overflow-hidden'
+          : 'flex-1 flex flex-col overflow-hidden',
+    // Below lg, split stacks in a column: panels need flex-1 min-h-0 to
+    // share height evenly (same pattern as the dedicated Stacked mode).
+    // At lg+, that gives way to the fixed CSS-var width for the row layout.
+    editorClassName: splitIsSideBySide
+      ? 'flex-1 min-h-0 min-w-0 overflow-hidden w-full lg:flex-none lg:w-[var(--editor-w)]'
+      : 'min-w-0 overflow-hidden',
+    previewClassName: splitIsSideBySide
+      ? 'flex-1 min-h-0 min-w-0 overflow-hidden w-full lg:flex-none lg:w-[var(--preview-w)]'
+      : 'min-w-0 overflow-hidden',
+    editorStyle: splitIsSideBySide ? ({ '--editor-w': `${editorWidth}%` } as React.CSSProperties) : undefined,
+    previewStyle: splitIsSideBySide ? ({ '--preview-w': `${100 - editorWidth}%` } as React.CSSProperties) : undefined,
+  }), [readingMode, fullscreen, layoutMode, editorWidth, splitIsSideBySide]);
 
   return (
     <OnboardingHintProvider>
@@ -229,22 +248,25 @@ const MarkdownPreview: React.FC = () => {
           <>
             {/* Editor Panel - Split (skip mount entirely in reading mode) */}
             {!readingMode && (
-              <div className="min-w-0 overflow-hidden" style={layoutConfig.editorStyle}>
+              <div className={layoutConfig.editorClassName} style={layoutConfig.editorStyle}>
                 <EditorPanel {...editorPanelProps} />
               </div>
             )}
 
-            {/* Resizer */}
+            {/* Resizer — hidden below lg, where split renders as stacked
+                panels and a horizontal-drag handle wouldn't apply */}
             {!readingMode && (
-              <Resizer
-                onResize={setEditorWidth}
-                minPercent={10}
-                maxPercent={90}
-              />
+              <div className="hidden lg:block">
+                <Resizer
+                  onResize={setEditorWidth}
+                  minPercent={10}
+                  maxPercent={90}
+                />
+              </div>
             )}
 
             {/* Preview Panel - Split */}
-            <div className="min-w-0 overflow-hidden" style={readingMode ? undefined : layoutConfig.previewStyle}>
+            <div className={layoutConfig.previewClassName} style={readingMode ? undefined : layoutConfig.previewStyle}>
               <PreviewPanel {...previewPanelProps} />
             </div>
           </>
