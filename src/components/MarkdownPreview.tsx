@@ -256,13 +256,12 @@ const MarkdownPreview: React.FC = () => {
             {/* Resizer — hidden below lg, where split renders as stacked
                 panels and a horizontal-drag handle wouldn't apply */}
             {!readingMode && (
-              <div className="hidden lg:block">
-                <Resizer
-                  onResize={setEditorWidth}
-                  minPercent={10}
-                  maxPercent={90}
-                />
-              </div>
+              <Resizer
+                className="hidden lg:block"
+                onResize={setEditorWidth}
+                minPercent={10}
+                maxPercent={90}
+              />
             )}
 
             {/* Preview Panel - Split */}

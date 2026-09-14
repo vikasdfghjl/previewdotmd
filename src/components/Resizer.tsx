@@ -6,12 +6,19 @@ interface ResizerProps {
   onResize: (percentage: number) => void;
   minPercent?: number;
   maxPercent?: number;
+  /**
+   * Applied to the handle itself. Visibility classes must go here rather than
+   * on a wrapper — the percentage math measures `parentElement`, which has to
+   * be the row being split.
+   */
+  className?: string;
 }
 
 export const Resizer: React.FC<ResizerProps> = ({
   onResize,
   minPercent = 10,
   maxPercent = 90,
+  className = '',
 }) => {
   const resizerRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
@@ -92,7 +99,7 @@ export const Resizer: React.FC<ResizerProps> = ({
       ref={resizerRef}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
-      className="w-1 flex-shrink-0 cursor-col-resize bg-transparent hover:bg-blue-400 dark:hover:bg-blue-500 transition-colors group relative z-10 touch-none"
+      className={`${className} w-1 flex-shrink-0 cursor-col-resize bg-transparent hover:bg-blue-400 dark:hover:bg-blue-500 transition-colors group relative z-10 touch-none`}
       title="Drag to resize"
     >
       {/* Visual indicator — widened tap target on touch devices */}
