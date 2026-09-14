@@ -35,7 +35,7 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '', 
   ];
 
   return (
-    <div className={`flex items-center gap-1 ${className}`}>
+    <div className={`flex items-center gap-0.5 sm:gap-1 ${className}`}>
       {/* Layout mode selector — mutually exclusive, so it's a radio group rather than independent toggles */}
       <div role="radiogroup" aria-label="Layout mode" className="flex items-center gap-0.5 px-1 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800">
         {layoutModes.map(({ mode, label, icon }) => (
@@ -52,7 +52,7 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '', 
       </div>
 
       {/* Divider */}
-      <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
+      <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-0.5 sm:mx-1" />
 
       {/* Sync scroll toggle */}
       <div className="relative">
@@ -88,22 +88,24 @@ export const LayoutControls: React.FC<LayoutControlsProps> = ({ className = '', 
       </ToolbarButton>
 
       {/* Divider */}
-      <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-1" />
+      <div className="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-0.5 sm:mx-1" />
 
       {/* Zoom controls */}
       <div className="flex items-center gap-0.5">
+        {/* The level readout is hidden on phones to fit the docked bar; the
+            buttons' labels carry the current level there instead. */}
         <ToolbarButton
           onClick={() => setZoomLevel(zoomLevel - 10)}
-          title="Zoom out"
+          title={`Zoom out (${zoomLevel}%)`}
         >
           {Icons.zoomOut}
         </ToolbarButton>
-        <span className="text-xs text-gray-500 dark:text-gray-400 w-10 text-center select-none">
+        <span className="hidden sm:inline-block text-xs text-gray-500 dark:text-gray-400 w-10 text-center select-none">
           {zoomLevel}%
         </span>
         <ToolbarButton
           onClick={() => setZoomLevel(zoomLevel + 10)}
-          title="Zoom in"
+          title={`Zoom in (${zoomLevel}%)`}
         >
           {Icons.zoomIn}
         </ToolbarButton>

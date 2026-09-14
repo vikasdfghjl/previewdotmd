@@ -258,6 +258,7 @@ const MarkdownPreview: React.FC = () => {
             {!readingMode && (
               <Resizer
                 className="hidden lg:block"
+                value={editorWidth}
                 onResize={setEditorWidth}
                 minPercent={10}
                 maxPercent={90}

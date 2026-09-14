@@ -254,11 +254,14 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
           <div className="flex items-center gap-1.5">{Icons.download}<span className="hidden sm:inline">Download</span></div>
         </ActionButton>
       )}
-      <ActionButton onClick={() => setShowClearConfirm(true)} title="Clear all markdown content" variant="danger">
-        <div className="flex items-center gap-1.5">{Icons.trash}<span className="hidden sm:inline">Clear All</span></div>
-      </ActionButton>
       <ActionButton onClick={onReset} title="Load the demo example document">
         <div className="flex items-center gap-1.5">{Icons.reset}<span className="hidden sm:inline">Load Example</span></div>
+      </ActionButton>
+      {/* Destructive action goes last, set apart from the everyday file actions
+          so it isn't one mis-tap away from Download. */}
+      <div className="w-px h-5 bg-gray-200 dark:bg-gray-700" aria-hidden="true" />
+      <ActionButton onClick={() => setShowClearConfirm(true)} title="Clear all markdown content" variant="danger">
+        <div className="flex items-center gap-1.5">{Icons.trash}<span className="hidden sm:inline">Clear All</span></div>
       </ActionButton>
     </>
   );
@@ -405,8 +408,10 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
       <StorageNotice />
 
       <div className="px-5 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 flex items-center justify-between">
-        <div id="editor-stats" className="flex items-center gap-4 text-xs text-secondary flex-wrap" aria-label="Editor statistics">
-          <span>{markdown.length} characters</span>
+        {/* Single row on phones: character count and tab size drop out below sm
+            so the stats and save status never wrap into a taller footer. */}
+        <div id="editor-stats" className="flex items-center gap-4 text-xs text-secondary whitespace-nowrap min-w-0" aria-label="Editor statistics">
+          <span className="hidden sm:inline">{markdown.length} characters</span>
           <span>{markdown.split(/\s+/).filter(Boolean).length} words</span>
           <span>{markdown.split('\n').length} lines</span>
           {/* Auto-save status indicator */}
@@ -432,7 +437,7 @@ export const EditorPanel = React.memo<EditorPanelProps & { ref?: React.Ref<Edito
             </span>
           )}
         </div>
-        <div className="text-xs text-secondary">Tab size: 2 spaces</div>
+        <div className="hidden sm:block text-xs text-secondary whitespace-nowrap">Tab size: 2 spaces</div>
       </div>
 
       <ConfirmDialog

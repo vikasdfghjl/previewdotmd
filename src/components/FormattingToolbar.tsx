@@ -67,7 +67,7 @@ const TOOLBAR_ACTIONS: ToolbarAction[] = [
     action: () => ({ replacement: '| Header | Header | Header |\n|--------|--------|--------|\n| Cell   | Cell   | Cell   |\n| Cell   | Cell   | Cell   |\n' }),
   },
   {
-    label: 'Code Block', title: 'Code Block', icon: Icons.formatCode,
+    label: 'Code Block', title: 'Code Block', icon: Icons.code,
     action: ({ text }) => ({ replacement: `\`\`\`\n${text || 'code'}\n\`\`\`` }),
   },
   {
@@ -155,7 +155,7 @@ export const FormattingToolbar: React.FC<FormattingToolbarProps> = ({
             key={item.label}
             size="sm"
             onClick={() => handleAction(item.action)}
-            title={item.shortcut ? `${item.title} (${item.shortcut})` : item.title}
+            title={item.title}
           >
             {item.icon}
           </ToolbarButton>

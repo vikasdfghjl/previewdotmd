@@ -19,9 +19,11 @@ interface ToolbarButtonProps {
 }
 
 // sm grows to the 44px touch-target minimum on coarse pointers (phones/tablets).
+// md narrows to 36px below sm (height stays 44px) so the full layout-controls
+// bar fits a 360px phone without scrolling.
 const sizeClasses = {
   sm: 'p-1.5 min-w-[32px] min-h-[32px] pointer-coarse:min-w-11 pointer-coarse:min-h-11 rounded',
-  md: 'p-2 min-w-[44px] min-h-[44px] rounded-md',
+  md: 'p-2 min-w-9 sm:min-w-[44px] min-h-[44px] rounded-md',
 } as const;
 
 /**

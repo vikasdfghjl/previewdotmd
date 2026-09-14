@@ -5,10 +5,15 @@ import { getStorageItem, setStorageItem } from '@/lib/safeStorage';
 
 // Order matters — hints are shown one at a time, in this sequence, so a
 // first-time user is never looking at more than one coachmark at once.
-const HINT_KEYS = ['command-palette', 'sync-scroll', 'drag-drop-upload'] as const;
+// The storage notice goes first: it's the one piece of information that
+// prevents data loss, and queueing it stops it stacking with a coachmark.
+const HINT_KEYS = ['storage-notice', 'command-palette', 'sync-scroll', 'drag-drop-upload'] as const;
 type HintKey = (typeof HINT_KEYS)[number];
 
 function storageKey(key: HintKey) {
+  // The storage notice predates this queue — keep its original key so anyone
+  // who already dismissed it doesn't see it again.
+  if (key === 'storage-notice') return 'previewmd-storage-notice-dismissed';
   return `previewmd-hint-${key}-dismissed`;
 }
 

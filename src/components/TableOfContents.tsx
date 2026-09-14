@@ -98,7 +98,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
                 {/* Inner collapse toggle */}
                 <button
                   onClick={() => setCollapsed(!collapsed)}
-                  className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400"
+                  className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400"
                   title={collapsed ? 'Expand headings' : 'Collapse headings'}
                   aria-label={collapsed ? 'Expand headings list' : 'Collapse headings list'}
                 >
@@ -114,12 +114,13 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
                 {/* Close panel button */}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400"
+                  className="p-1.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-400"
                   title="Hide table of contents"
                   aria-label="Hide table of contents panel"
                 >
+                  {/* Double chevron — distinct from the single-chevron collapse toggle beside it */}
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                   </svg>
                 </button>
               </div>
